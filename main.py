@@ -17,7 +17,7 @@ app.mount(
 
 @app.get("/")
 async def home(request: Request):
-    return templates.TemplateResponse('index.html', context={'request': request})
+    return templates.TemplateResponse('homepage.html', context={'request': request})
 
 @app.get('/items/{item}')
 async def get_item(item : str):
