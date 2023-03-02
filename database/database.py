@@ -5,10 +5,11 @@ import _credentials
 
 # SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"
 # SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
-SQLALCHEMY_DATABASE_URL = f"mysql://{_credentials.username}:{_credentials.password}@127.0.0.1/{_credentials.database}"
+SQLALCHEMY_DATABASE_URL = "mysql+pymysql://{_credentials.username}:{_credentials.password}@127.0.0.1/{_credentials.database}"
+
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    SQLALCHEMY_DATABASE_URL 
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
