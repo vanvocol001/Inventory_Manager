@@ -23,21 +23,22 @@ app.mount(
 async def home(request: Request):
     return templates.TemplateResponse('Homepage.html', context={'request': request})
 
+
 @app.get('/items/{item}')
 async def get_item(item : str):
      return {'item name': item}
-
 
 
 class inventoryItem(BaseModel):
      id: UUID
      description: str = Field(min_length=1)
 
+
 PRODUCTS = []
 def create_inventoryItems():
      product1 = inventoryItem(id = 'de296eb3-4f81-4131-a31a-37c449d62c96', description = "coke")
-
      PRODUCTS.append(product1)
+
 
 @app.get('/products')
 async def getProducts(request: Request):

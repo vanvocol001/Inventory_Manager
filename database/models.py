@@ -1,26 +1,33 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from database import Base
+from .database import Base
 
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "User"
 
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String(100), unique=True, index=True)
-    hashed_password = Column(String(100))
-    is_active = Column(Boolean, default=True)
+    userID = Column(String, primary_key=True, index=True)
+    firstName = Column(String, index=True)
+    lastName = Column(String, index=True)
+    accountLevel = Column(Integer)
+    password = Column(String)
 
-    items = relationship("Item", back_populates="owner")
+
+class InventoryItem(Base):
+    __tablename__ = "InventoryItem"
+
+    productID = Column(Integer, primary_key=True)
+    description = Column(String)
+    supplierID = Column(Integer, ForeignKey("Supplier.supplierID"))
+    stock = Column(Integer)
+    restockLimit = Column(Integer)
+    image = Column(String)
 
 
-class Item(Base):
-    __tablename__ = "items"
+class Supplier(Base):
+    __tablename__ = "Supplier"
 
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(100), index=True)
-    description = Column(String(100), index=True)
-    owner_id = Column(Integer, ForeignKey("users.id"))
-
-    owner = relationship("User", back_populates="items")
+    supplierID = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    address = Column(String)
