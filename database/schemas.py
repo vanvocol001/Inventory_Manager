@@ -1,6 +1,7 @@
 from typing import List, Union
 
 from pydantic import BaseModel
+from datetime import date
 
 
 class User(BaseModel):
@@ -29,6 +30,24 @@ class Supplier(BaseModel):
     supplierID: int
     name: str
     address: str
+
+    class Config:
+        orm_mode = True
+
+
+class TransactionReport(BaseModel):
+    productID: int
+    quantitySold: int
+
+    class Config:
+        orm_mode = True
+
+
+class Transaction(BaseModel):
+    transactionID: int
+    date: date
+
+    transactions: list[TransactionReport] = []
 
     class Config:
         orm_mode = True

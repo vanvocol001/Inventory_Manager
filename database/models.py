@@ -1,5 +1,6 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Date
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 from .database import Base
 
@@ -31,3 +32,22 @@ class Supplier(Base):
     supplierID = Column(Integer, primary_key=True, index=True)
     name = Column(String)
     address = Column(String)
+
+
+class TransactionReport(Base):
+    __tablename__ = "TransactionReport"
+
+    transactionID = Column(Integer, ForeignKey("Transaction.transactionID"), primary_key=True)
+    productID = Column(Integer, ForeignKey("InventoryItem.productID"), primary_key=True)
+    quantitySold = Column(Integer)
+
+    transaction = relationship("Transaction", back_populates="transactions")
+
+
+class Transaction(Base):
+    __tablename__ = "Transaction"
+
+    transactionID = Column(Integer, primary_key=True, index=True)
+    date = Column(Date, server_default=func.now())
+
+    transactions = relationship("TransactionReport", back_populates="transaction")
