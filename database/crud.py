@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-import models, schemas
+from . import models, schemas
 
 
 def get_inventory_items(db: Session, skip: int = 0, limit: int = 100):

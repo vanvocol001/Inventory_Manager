@@ -1,2 +1,3 @@
 database/_credentials.py
 venv/
+.idea/
