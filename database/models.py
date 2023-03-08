@@ -51,3 +51,42 @@ class Transaction(Base):
     date = Column(Date, server_default=func.now())
 
     transactions = relationship("TransactionReport", back_populates="transaction")
+
+
+class InventoryOrder(Base):
+    __tablename__ = "InventoryOrder"
+
+    deliveryID = Column(Integer, ForeignKey("Delivery.deliveryID"), primary_key=True, index=True)
+    productID = Column(Integer, ForeignKey("InventoryItem.productID"), primary_key=True, index=True)
+    quantityOrdered = Column(Integer)
+
+
+class Delivery(Base):
+    __tablename__ = "Delivery"
+
+    deliveryID = Column(Integer, primary_key=True, index=True)
+    dateOrdered = Column(Date, server_default=func.now())
+    dateExpected = Column(Date)
+    supplierID = Column(Integer, ForeignKey("Supplier.SupplierID"))
+
+    items = relationship("InventoryOrder")
+
+
+class DisposedInventoryReport(Base):
+    __tablename__ = "DisposedInventoryReport"
+
+    disposalID = Column(Integer, ForeignKey("DisposedInventory.disposalID"), primary_key=True)
+    productID = Column(Integer, ForeignKey("InventoryItem.productID"), primary_key=True)
+    quantityDisposed = Column(Integer)
+
+
+class DisposedInventory(Base):
+    __tablename__ = "DisposedInventory"
+
+    disposalID = Column(Integer, primary_key=True, index=True)
+    dateDisposed = Column(Date, server_default=func.now())
+    reason = Column(String)
+    userID = Column(String, ForeignKey("User.userID"))
+
+    disposalReport = relationship("DisposedInventoryReport")
+

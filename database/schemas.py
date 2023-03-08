@@ -1,20 +1,23 @@
-from typing import List, Union
+from typing import List, Union, Any
 
+import pydantic.utils
 from pydantic import BaseModel
 from datetime import date
 
 
-class User(BaseModel):
+class ORMModel(BaseModel):
+    class Config:
+        orm_mode = True
+
+
+class User(ORMModel):
     userID: str
     firstName: str
     lastName: str
     accountLevel: int
 
-    class Config:
-        orm_mode = True
 
-
-class InventoryItem(BaseModel):
+class InventoryItem(ORMModel):
     productID: int
     description: str
     supplierID: int
@@ -22,32 +25,50 @@ class InventoryItem(BaseModel):
     restockLimit: int
     image: Union[str, None] = None
 
-    class Config:
-        orm_mode = True
 
-
-class Supplier(BaseModel):
+class Supplier(ORMModel):
     supplierID: int
     name: str
     address: str
 
-    class Config:
-        orm_mode = True
 
-
-class TransactionReport(BaseModel):
+class TransactionReport(ORMModel):
     productID: int
     quantitySold: int
 
-    class Config:
-        orm_mode = True
 
-
-class Transaction(BaseModel):
+class Transaction(ORMModel):
     transactionID: int
     date: date
 
     transactions: list[TransactionReport] = []
 
-    class Config:
-        orm_mode = True
+
+class InventoryOrder(ORMModel):
+    deliveryID: int
+    productID: int
+    quantityOrdered: int
+
+
+class Delivery(ORMModel):
+    deliveryID: int
+    dateOrdered: date
+    dateExpected: date
+    supplierID: int
+
+    items: list[InventoryOrder] = []
+
+
+class DisposedInventoryReport(ORMModel):
+    disposalID: int
+    productID: int
+    quantityDisposed: int
+
+
+class DisposedInventory(ORMModel):
+    disposalID: int
+    dateDisposed: date
+    reason: str
+    userID: str
+
+    disposalReport: list[DisposedInventoryReport] = []
