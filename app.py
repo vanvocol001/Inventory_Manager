@@ -9,7 +9,12 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 from uuid import UUID
 
+from app.model import PostSchema, UserSchema, UserLoginSchema
+from app.auth.auth_handler import signJWT
+
 app = FastAPI()
+
+
 
 templates = Jinja2Templates(directory='templates')
 

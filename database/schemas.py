@@ -1,7 +1,7 @@
 from typing import List, Union, Any
 
 import pydantic.utils
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, EmailStr
 from datetime import date
 
 
@@ -15,6 +15,11 @@ class User(ORMModel):
     firstName: str
     lastName: str
     accountLevel: int
+    password: str
+    
+class UserLogin(ORMModel):
+    userID: str
+    password: str
 
 
 class InventoryItem(ORMModel):
