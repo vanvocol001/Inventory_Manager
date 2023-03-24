@@ -38,18 +38,23 @@ def get_db():
         db.close()
 
 
+@app.get("/testing", response_class=HTMLResponse)
+def get_testing_page(request: Request):
+    return templates.TemplateResponse("product.html", {"request": request})
+
+
 @app.get("/products/{productid}", response_class=HTMLResponse)
 def read_inventory_item(request: Request, productid: int, db: Session = Depends(get_db)):
     product = crud.get_inventory_item(db, productid=productid)
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found")
-    return templates.TemplateResponse("Homepage.html", {"request": request, "products": [product]})
+    return templates.TemplateResponse("product.html", {"request": request, "products": [product]})
 
 
 @app.get("/products/", response_class=HTMLResponse)
 def read_inventory_items(request: Request, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     inventory_items = crud.get_inventory_items(db, skip=skip, limit=limit)
-    return templates.TemplateResponse("Homepage.html", {"request": request, "products": inventory_items})
+    return templates.TemplateResponse("product.html", {"request": request, "products": inventory_items})
 
 
 @app.get("/suppliers/{supplierid}", response_model=schemas.Supplier)

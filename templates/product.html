@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+    <div id="content" style="margin: 15px">
+        {% for product in products %}
+            <div style="outline:0.01em solid black; width: 250px; padding: 15px; display: flex">
+                <table style="width: 100%">
+                    <tr>
+                        <th style="text-align: left; font-size: 24px">{{ product.description }}</th>
+                    </tr>
+                    <tr>
+                        <td style="padding-left: 10px">SupplierID: {{ product.supplierID }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-left: 10px">ProductID: {{ product.productID }}</td>
+                        <td style="text-align: right">{{ product.stock }} / {{ product.restockLimit }}</td>
+                    </tr>
+                </table>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock content %}
