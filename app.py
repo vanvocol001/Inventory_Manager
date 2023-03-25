@@ -40,7 +40,7 @@ def get_db():
 
 @app.get("/testing", response_class=HTMLResponse)
 def get_testing_page(request: Request):
-    return templates.TemplateResponse("product.html", {"request": request})
+    return templates.TemplateResponse("login.html", {"request": request})
 
 
 @app.get("/products/{productid}", response_class=HTMLResponse)

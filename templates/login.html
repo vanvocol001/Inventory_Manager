@@ -1,1 +1,29 @@
 {% extends "base.html" %}
+{% block scripts %}
+    <script>
+        $(document).ready(function() {
+            $('#password, #passwordconfirm').on('keyup',
+                function () {
+                    if ($('#password').val() == $('#passwordconfirm').val()) {
+                        $('#message').html('Your password matches').css('color', 'green');
+                    } else
+                        $('#message').html('Your password does not match').css('color', 'red');
+                });
+        });
+    </script>
+{% endblock scripts %}
+{% block content %}
+    <form id="registerform" style="margin: 20px">
+        <label for="userid">User ID:</label><br>
+        <input type="text" id="userid" name="userid" required><br>
+        <label for="firstname">First Name:</label><br>
+        <input type="text" id="firstname" name="firstname" required><br>
+        <label for="lastname">Last Name:</label><br>
+        <input type="text" id="lastname" name="lastname" required><br>
+        <label for="password">Password (8 characters minimum):</label><br>
+        <input type="password" id="password" name="password" minlength="8" required><br>
+        <label for="passwordconfirm">Confirm Password:</label><br>
+        <input type="password" id="passwordconfirm" name="passwordconfirm" minlength="8"  required><br>
+        <span id="message"></span>
+    </form>
+{% endblock content %}
