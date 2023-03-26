@@ -90,3 +90,10 @@ class DisposedInventory(Base):
 
     disposalReport = relationship("DisposedInventoryReport")
 
+
+class Session(Base):
+    __tablename__ = "Session"
+
+    cookie = Column(String, primary_key=True)
+    userID = Column(String, ForeignKey("User.userID"))
+

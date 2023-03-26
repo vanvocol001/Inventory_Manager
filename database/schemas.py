@@ -16,7 +16,8 @@ class User(ORMModel):
     lastName: str
     accountLevel: int
     password: str
-    
+
+
 class UserLogin(ORMModel):
     userID: str
     password: str

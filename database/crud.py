@@ -49,3 +49,7 @@ def get_disposal(db: Session, disposalid: int):
 
 def get_disposals(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.DisposedInventory).offset(skip).limit(limit).all()
+
+
+def get_user_session(db: Session, cookie_value: str):
+    return db.query(models.Session).filter(models.Session.cookie == cookie_value).first()
