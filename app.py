@@ -1,4 +1,5 @@
 from typing import List, Annotated
+from datetime import timedelta
 
 import bcrypt
 import uvicorn
@@ -59,7 +60,7 @@ async def user_login(userid: str = Form(...), password: str = Form(...),
         db.commit()
         db.refresh(new_session)
         redirect_response = RedirectResponse(url="/products", status_code=303)
-        redirect_response.set_cookie(key="_SESSION", value=cookie_value)
+        redirect_response.set_cookie(key="_SESSION", value=cookie_value, expires=43200)
         return redirect_response
     else:
         return "failure"
@@ -81,7 +82,6 @@ def user_logout(request: Request, response: Response, db: Session = Depends(get_
         return redirect_response
     else:
         return {"status": "cookie not found in database"}
-
 
 
 @app.post("/register")
