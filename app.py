@@ -1,5 +1,6 @@
 from typing import List, Annotated
 from datetime import timedelta
+from time import monotonic
 
 import hashlib
 import uvicorn
@@ -50,11 +51,15 @@ def get_homepage(request: Request):
 @app.post("/login")
 async def user_login(userid: str = Form(...), password: str = Form(...),
                      db: Session = Depends(get_db)):
+    print(monotonic())
     user = crud.get_user(db, userid=userid)
+    print(monotonic())
     if user is None:
         raise HTTPException(status_code=404, detail=f"User {userid} was not found.")
     else:
+        print(monotonic())
         hash_pw = hashlib.sha256(password.encode('utf-8')).hexdigest()
+        print(monotonic())
         if user.password == hash_pw:
             cookie_value = secrets.token_urlsafe(32)
             new_session = models.Session(cookie=cookie_value, userID=userid)
@@ -63,6 +68,7 @@ async def user_login(userid: str = Form(...), password: str = Form(...),
             db.refresh(new_session)
             redirect_response = RedirectResponse(url="/products", status_code=303)
             redirect_response.set_cookie(key="_SESSION", value=cookie_value, expires=43200)
+            print(monotonic())
             return redirect_response
         else:
             return "failure"
