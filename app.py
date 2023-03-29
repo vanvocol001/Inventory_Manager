@@ -1,5 +1,4 @@
 from typing import List, Annotated
-from datetime import timedelta
 
 import hashlib
 import uvicorn
@@ -13,14 +12,8 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from pathlib import Path
 
-from pydantic import BaseModel, Field
-from uuid import UUID
-
 from database import crud, models, schemas
 from database.database import SessionLocal, engine
-
-# from app.model import PostSchema, UserSchema, UserLoginSchema
-# from app.auth.auth_handler import signJWT
 
 app = FastAPI()
 
