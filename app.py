@@ -1,7 +1,7 @@
 from typing import List, Annotated
 from datetime import timedelta
 
-import bcrypt
+import hashlib
 import uvicorn
 import secrets
 
@@ -53,17 +53,19 @@ async def user_login(userid: str = Form(...), password: str = Form(...),
     user = crud.get_user(db, userid=userid)
     if user is None:
         raise HTTPException(status_code=404, detail=f"User {userid} was not found.")
-    if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-        cookie_value = secrets.token_urlsafe(32)
-        new_session = models.Session(cookie=cookie_value, userID=userid)
-        db.add(new_session)
-        db.commit()
-        db.refresh(new_session)
-        redirect_response = RedirectResponse(url="/products", status_code=303)
-        redirect_response.set_cookie(key="_SESSION", value=cookie_value, expires=43200)
-        return redirect_response
     else:
-        return "failure"
+        hash_pw = hashlib.sha256(password.encode('utf-8')).hexdigest()
+        if user.password == hash_pw:
+            cookie_value = secrets.token_urlsafe(32)
+            new_session = models.Session(cookie=cookie_value, userID=userid)
+            db.add(new_session)
+            db.commit()
+            db.refresh(new_session)
+            redirect_response = RedirectResponse(url="/products", status_code=303)
+            redirect_response.set_cookie(key="_SESSION", value=cookie_value, expires=43200)
+            return redirect_response
+        else:
+            return "failure"
 
 
 @app.get("/logout")
@@ -90,7 +92,7 @@ def user_register(userid: str = Form(...), firstname: str = Form(...), lastname:
     check_user = crud.get_user(db, userid=userid)
     if check_user is not None:
         raise HTTPException(status_code=303, detail=f"User {userid} already exists")
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
     new_user = models.User(userID=userid, firstName=firstname, lastName=lastname, accountLevel=0,
                            password=hashed_password)
     db.add(new_user)
