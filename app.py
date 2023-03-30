@@ -54,7 +54,7 @@ async def user_login(userid: str = Form(...), password: str = Form(...),
             db.add(new_session)
             db.commit()
             db.refresh(new_session)
-            redirect_response = RedirectResponse(url="/products", status_code=303)
+            redirect_response = RedirectResponse(url="/products", status_code=302)
             redirect_response.set_cookie(key="_SESSION", value=cookie_value, expires=43200)
             return redirect_response
         else:
@@ -64,7 +64,7 @@ async def user_login(userid: str = Form(...), password: str = Form(...),
 @app.get("/logout")
 def user_logout(request: Request, response: Response, db: Session = Depends(get_db)):
     cookie = request.cookies.get("_SESSION")
-    redirect_response = RedirectResponse(url="/", status_code=303)
+    redirect_response = RedirectResponse(url="/", status_code=302)
     if cookie is not None:
         redirect_response.delete_cookie("_SESSION")
     else:
