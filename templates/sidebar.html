@@ -1,8 +1,10 @@
-<div class="sidebar" style="width: 250px; height: 100%; background-color: #333333">
-    <ul id="sidebaritems" class="sidebaritems" style="margin: 0; padding-top: 30px; color: white">
-        <li style="padding-top: 5px;"><a href="{{ url_for("read_inventory_items") }}">Products</a></li>
-        <li style="padding-top: 5px;">Testing</li>
-        <li style="padding-top: 5px;">Testing</li>
-        <li style="padding-top: 5px;">Testing</li>
-    </ul>
-</div>
+<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar">
+    <div class="position-sticky pt-3 sidebar-sticky">
+        <ul id="sidebaritems" class="nav flex-column">
+            <li class="nav-item"><a class="nav-link" href="{{ url_for("read_inventory_items") }}">Products</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">Testing</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">Testing</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">Testing</a></li>
+        </ul>
+    </div>
+</nav>

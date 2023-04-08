@@ -1,4 +1,5 @@
-from typing import List, Annotated
+from typing import List
+from collections import defaultdict
 
 import hashlib
 import uvicorn
@@ -35,6 +36,49 @@ def get_db():
         db.close()
 
 
+def collate_deliveries(db: Session = Depends(get_db), skip: int = 0, limit: int = 100):
+    deliveries_dict = {}
+    deliveries = crud.get_deliveries(db, skip=skip, limit=limit)
+
+    for delivery in deliveries:
+        # Setup default dict for new delivery IDs
+        if delivery.deliveryID not in deliveries_dict:
+            deliveries_dict[delivery.deliveryID] = {
+                "deliveryID": delivery.deliveryID,
+                "dateExpected": delivery.dateExpected,
+                "dateOrdered": delivery.dateOrdered,
+                "itemsOrdered": {},
+            }
+
+        currentDelivery = deliveries_dict[delivery.deliveryID]
+        itemsOrdered = crud.get_items_from_delivery(db, delivery.deliveryID)
+        for item in itemsOrdered:
+            currentDelivery["itemsOrdered"][item.productID] = item.quantityOrdered
+    return deliveries_dict
+
+
+def collate_disposals(db: Session = Depends(get_db), skip: int = 0, limit: int = 100):
+    disposals_dict = {}
+    disposals = crud.get_disposals(db, skip=skip, limit=limit)
+
+    for disposal in disposals:
+        # Setup default dict for new disposal IDs
+        if disposal.disposalID not in disposals_dict:
+            disposals_dict[disposal.disposalID] = {
+                "disposalID": disposal.disposalID,
+                "dateDisposed": disposal.dateDisposed,
+                "reason": disposal.reason,
+                "user": disposal.userID,
+                "itemsDisposed": {},
+            }
+
+        currentDisposal = disposals_dict[disposal.disposalID]
+        itemsDisposed = crud.get_items_from_disposal(db, disposal.disposalID)
+        for item in itemsDisposed:
+            currentDisposal["itemsDisposed"][item.productID] = item.quantityDisposed
+    return disposals_dict
+
+
 @app.get("/", response_class=HTMLResponse)
 def get_homepage(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
@@ -54,7 +98,7 @@ async def user_login(userid: str = Form(...), password: str = Form(...),
             db.add(new_session)
             db.commit()
             db.refresh(new_session)
-            redirect_response = RedirectResponse(url="/products", status_code=302)
+            redirect_response = RedirectResponse(url="/homepage", status_code=302)
             redirect_response.set_cookie(key="_SESSION", value=cookie_value, expires=43200)
             return redirect_response
         else:
@@ -94,12 +138,30 @@ def user_register(userid: str = Form(...), firstname: str = Form(...), lastname:
     return new_user
 
 
+@app.get("/homepage/")
+def get_homepage(request: Request, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    cookie = request.cookies.get("_SESSION")
+    if cookie is not None:
+        session = crud.get_user_session(db, request.cookies.get("_SESSION"))
+        if session is not None:
+            inventory_items = crud.get_inventory_items(db, skip=skip, limit=limit)
+            deliveries = collate_deliveries(db, skip=skip, limit=limit)
+            disposals = collate_disposals(db, skip=skip, limit=limit)
+            return templates.TemplateResponse("overview.html", {"request": request, "products": inventory_items,
+                                                                "deliveries": deliveries, "disposals": disposals,
+                                                                "user": session.userID})
+        else:
+            return {"error": "You must be logged in."}
+    else:
+        return {"error": "You must be logged in."}
+
+
 @app.get("/products/{productid}", response_class=HTMLResponse)
 def read_inventory_item(request: Request, productid: int, db: Session = Depends(get_db)):
     product = crud.get_inventory_item(db, productid=productid)
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found")
-    return templates.TemplateResponse("product.html", {"request": request, "products": [product]})
+    return templates.TemplateResponse("overview.html", {"request": request, "products": [product]})
 
 
 @app.get("/products/")
@@ -109,8 +171,8 @@ def read_inventory_items(request: Request, skip: int = 0, limit: int = 100, db: 
         session = crud.get_user_session(db, request.cookies.get("_SESSION"))
         if session is not None:
             inventory_items = crud.get_inventory_items(db, skip=skip, limit=limit)
-            return templates.TemplateResponse("product.html", {"request": request, "products": inventory_items,
-                                              "user": session.userID})
+            return templates.TemplateResponse("overview.html", {"request": request, "products": inventory_items,
+                                                                "user": session.userID})
         else:
             return {"error": "You must be logged in."}
     else:

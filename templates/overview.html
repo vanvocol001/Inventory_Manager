@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+    <main id="content" class="col-md-9 col-lg-10 ms-auto">
+        <div class="container ms-0 mt-2">
+            <div class="row justify-content-start">
+                <div id="products" class="col-3">
+                <h3>Product Overview</h3>
+                <hr>
+                {% for product in products %}
+                    <div class="card mt-1">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.description }}</h5>
+                            <div class="card-text"><span class="infotext">Supplier ID: </span>{{ product.supplierID }}</div>
+                            <div class="d-flex justify-content-between">
+                                <div class="card-text"><span class="infotext">Product No: </span>{{ product.productID }}</div>
+                                <div class="card-text"><span style="{{ 'color: red' if product.stock < product.restockLimit
+                                        else 'color: green' }}">{{ product.stock }}</span> / {{ product.restockLimit }}</div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+                <div id="deliveries" class="col-3">
+                <h3>Deliveries</h3>
+                <hr>
+                {% for deliveryID, delivery in deliveries.items() %}
+                    <div class="card mt-1">
+                        <div class="card-body">
+                            <h5 class="card-title">#{{ deliveryID }}</h5>
+                            <div class="card-text"><span class="infotext">Date Ordered: </span>{{ delivery.dateOrdered }}</div>
+                            <div class="card-text"><span class="infotext">Date Expected: </span>{{ delivery.dateExpected }}</div>
+                            <div class="card-text" style="font-size: x-small">Add a dropdown here to show products in delivery</div>
+                            {% for item, quantity in delivery.itemsOrdered.items() %}
+                                <div class="card-text"><span class="infotext">{{ item }}: {{ quantity }}</span></div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+                <div id="disposals" class="col-3">
+                <h3>Disposals</h3>
+                <hr>
+                {% for disposalID, disposal in disposals.items() %}
+                    <div class="card mt-1">
+                        <div class="card-body">
+                            <h5 class="card-title">#{{ disposalID }}</h5>
+                            <div class="card-text"><span class="infotext">Date Disposed: </span>{{ disposal.dateDisposed }}</div>
+                            <div class="card-text"><span class="infotext">Reason: </span>{{ disposal.reason }}</div>
+                            <div class="card-text"><span class="infotext">User: </span>{{ disposal.user }}</div>
+                            <div class="card-text" style="font-size: x-small">Add a dropdown here to show products in disposal</div>
+                            {% for item, quantity in disposal.itemsDisposed.items() %}
+                                <div class="card-text"><span class="infotext">{{ item }}: {{ quantity }}</span></div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock content %}
