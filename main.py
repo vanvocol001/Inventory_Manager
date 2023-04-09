@@ -72,15 +72,34 @@ def collate_disposals(db: Session = Depends(get_db), skip: int = 0, limit: int =
                 "itemsDisposed": {},
             }
 
-        currentDisposal = disposals_dict[disposal.disposalID]
-        itemsDisposed = crud.get_items_from_disposal(db, disposal.disposalID)
-        for item in itemsDisposed:
-            currentDisposal["itemsDisposed"][item.productID] = item.quantityDisposed
+        current_disposal = disposals_dict[disposal.disposalID]
+        items_disposed = crud.get_items_from_disposal(db, disposal.disposalID)
+        for item in items_disposed:
+            current_disposal["itemsDisposed"][item.productID] = item.quantityDisposed
     return disposals_dict
 
 
+def get_user_from_cookie(request: Request, db: Session = Depends(get_db)):
+    cookie = request.cookies.get("_SESSION")
+    if cookie is not None:
+        session = crud.get_user_session(db, cookie)
+        if session is not None:
+            return session.userID
+    return None
+
+
+def is_user_admin(userid: str, db: Session = Depends(get_db)):
+    user = crud.get_user(db, userid)
+    if user is not None:
+        return user.accountLevel >= 10
+    return False
+
+
 @app.get("/", response_class=HTMLResponse)
-def get_homepage(request: Request):
+def get_mainpage(request: Request, db: Session = Depends(get_db)):
+    user = get_user_from_cookie(request, db)
+    if user is not None:
+        return RedirectResponse("/homepage")
     return templates.TemplateResponse("login.html", {"request": request})
 
 
@@ -135,25 +154,22 @@ def user_register(userid: str = Form(...), firstname: str = Form(...), lastname:
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return new_user
+    redirect_response = RedirectResponse(url="/homepage", status_code=302)
+    return redirect_response
 
 
-@app.get("/homepage/")
+@app.get("/homepage/", response_class=HTMLResponse)
 def get_homepage(request: Request, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    cookie = request.cookies.get("_SESSION")
-    if cookie is not None:
-        session = crud.get_user_session(db, request.cookies.get("_SESSION"))
-        if session is not None:
-            inventory_items = crud.get_inventory_items(db, skip=skip, limit=limit)
-            deliveries = collate_deliveries(db, skip=skip, limit=limit)
-            disposals = collate_disposals(db, skip=skip, limit=limit)
-            return templates.TemplateResponse("overview.html", {"request": request, "products": inventory_items,
-                                                                "deliveries": deliveries, "disposals": disposals,
-                                                                "user": session.userID})
-        else:
-            return {"error": "You must be logged in."}
-    else:
-        return {"error": "You must be logged in."}
+    user = get_user_from_cookie(request, db)
+    if user is not None:
+        inventory_items = crud.get_inventory_items(db, skip=skip, limit=limit)
+        deliveries = collate_deliveries(db, skip=skip, limit=limit)
+        disposals = collate_disposals(db, skip=skip, limit=limit)
+        is_admin = is_user_admin(user, db)
+        return templates.TemplateResponse("overview.html", {"request": request, "products": inventory_items,
+                                                            "deliveries": deliveries, "disposals": disposals,
+                                                            "user": user, "is_admin": is_admin})
+    return RedirectResponse(url="/")
 
 
 @app.get("/products/{productid}", response_class=HTMLResponse)
@@ -164,14 +180,14 @@ def read_inventory_item(request: Request, productid: int, db: Session = Depends(
     return templates.TemplateResponse("overview.html", {"request": request, "products": [product]})
 
 
-@app.get("/products/")
+@app.get("/products/", response_class=HTMLResponse)
 def read_inventory_items(request: Request, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     cookie = request.cookies.get("_SESSION")
     if cookie is not None:
         session = crud.get_user_session(db, request.cookies.get("_SESSION"))
         if session is not None:
             inventory_items = crud.get_inventory_items(db, skip=skip, limit=limit)
-            return templates.TemplateResponse("overview.html", {"request": request, "products": inventory_items,
+            return templates.TemplateResponse("products.html", {"request": request, "products": inventory_items,
                                                                 "user": session.userID})
         else:
             return {"error": "You must be logged in."}
@@ -201,10 +217,16 @@ def read_user(userid: str, db: Session = Depends(get_db)):
     return user
 
 
-@app.get("/users/", response_model=List[schemas.User])
-def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    users = crud.get_users(db, skip=skip, limit=limit)
-    return users
+@app.get("/users/", response_class=HTMLResponse)
+def read_users(request: Request, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    user = get_user_from_cookie(request, db)
+    if user is not None:
+        is_admin = is_user_admin(user, db)
+        if is_admin:
+            users = crud.get_users(db, skip=skip, limit=limit)
+            return templates.TemplateResponse("users.html", {"request": request, "users": users,
+                                                             "user": user, "is_admin": is_admin})
+    return RedirectResponse("/")
 
 
 @app.get("/transactions/{transactionid}", response_model=schemas.Transaction)

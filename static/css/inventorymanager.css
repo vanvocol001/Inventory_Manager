@@ -1,13 +1,21 @@
+body {
+    background-color: #FDEEDC;
+}
+
 .site-header {
-    background-color: #dc7d09;
+    background-color: #FC7300;
 }
 
 .site-header a {
-    color: #d2f4ea;
+    color: #F6F1E9;
     text-decoration: none;
 }
 
 .site-header a:hover {
+    color: #fff;
+}
+
+.site-header .navbar-brand:focus {
     color: #fff;
 }
 
@@ -23,7 +31,7 @@
     bottom: 0;
     z-index: 100;
     padding-top: 56px;
-    background-color: #fcb773;
+    background-color: #F1A661;
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
 }
 
@@ -36,11 +44,16 @@
 }
 
 #sidebaritems a {
-    color: #d2f4ea;
+    color: #F6F1E9;
+    font-size: large;
 }
 
 #sidebaritems a:hover {
     color: #fff;
+}
+
+#sidebaritems a.active {
+    background-color: #FC7300;
 }
 
 #mainContainer {
