@@ -1,8 +1,14 @@
-<div class="sidebar" style="width: 250px; height: 100%; background-color: #333333">
-    <ul id="sidebaritems" class="sidebaritems" style="margin: 0; padding-top: 30px; color: white">
-        <li style="padding-top: 5px;"><a href="{{ url_for("read_inventory_items") }}">Products</a></li>
-        <li style="padding-top: 5px;">Testing</li>
-        <li style="padding-top: 5px;">Testing</li>
-        <li style="padding-top: 5px;">Testing</li>
+<div class="position-sticky pt-3 sidebar-sticky">
+    <ul id="sidebaritems" class="nav nav-pills flex-column">
+        <li class="nav-item"><a class="nav-link {% if request.url.path == "/homepage/" %}active{% endif %}"
+                                href="{{ url_for("get_homepage") }}">Homepage</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Testing</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Testing</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Testing</a></li>
+        {% if is_admin %}
+            <hr class="mt-3 mb-2 w-75 ms-3">
+            <li class="text-white">You're an admin! This is for testing!</li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for("read_users") }}">Users</a></li>
+        {% endif %}
     </ul>
 </div>

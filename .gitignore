@@ -2,3 +2,5 @@ database/_credentials.py
 _secrets.py
 venv/
 .idea/
+.space
+Spacefile

@@ -43,6 +43,14 @@ def get_deliveries(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Delivery).offset(skip).limit(limit).all()
 
 
+def get_items_from_delivery(db: Session, deliveryid: int):
+    return db.query(models.InventoryOrder).filter(models.InventoryOrder.deliveryID == deliveryid).all()
+
+
+def get_items_from_disposal(db: Session, disposalid: int):
+    return db.query(models.DisposedInventoryReport).filter(models.DisposedInventoryReport.disposalID == disposalid).all()
+
+
 def get_disposal(db: Session, disposalid: int):
     return db.query(models.DisposedInventory).filter(models.DisposedInventory.disposalID == disposalid).first()
 

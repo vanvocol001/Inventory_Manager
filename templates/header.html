@@ -1,10 +1,18 @@
-<div id="header" class="header" style="width: 100%; height: 74px; background-color: #333333">
-    <div id="headerlinks" style="display: flex; justify-content: flex-end; padding-top: 30px;">
-        <div id="signin" class="headerbutton" style="color: white; margin-right: 30px">
-            {{ user }}
-        </div>
-        <div id="logout" class="headerbutton" style="color: white; margin-right: 30px">
-            <a href="{{ url_for("user_logout") }}">Log Out</a>
-        </div>
+<nav id="header" class="navbar site-header navbar-expand-lg sticky-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{{ url_for("get_homepage") }}">Inventory Manager</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+            <div class="navbar-text">{{ user }}</div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for("user_logout") }}">Logout</a>
+        </li>
+      </ul>
     </div>
-</div>
+  </div>
+</nav>
