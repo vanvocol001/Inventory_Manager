@@ -1,5 +1,7 @@
 
 
+
+
 <!DOCTYPE html>
 <!-- Created By CodingNepal -->
 <html lang="en" dir="ltr">
@@ -20,7 +22,7 @@
                     height: 100%;
                     width: 100%;
                     place-items: center;
-                    background: -webkit-linear-gradient(left, #191819, #FFA500);
+                    background: -webkit-linear-gradient(left, #FC7300, #FC7300);
                   }
                   ::selection{
                     background: #FFA500;
@@ -169,7 +171,7 @@
                     width: 300%;
                     position: absolute;
                     left: -100%;
-                    background: -webkit-linear-gradient(right, #a445b2, #fa4299, #a445b2, #fa4299);
+                    background: -webkit-linear-gradient(right, #F6F1E9, #FC7300, #F6F1E9, #FC7300;
                     border-radius: 5px;
                     transition: all 0.4s ease;;
                   }
@@ -229,7 +231,7 @@
             <div class="form-inner">
                <form action="{{ url_for("user_login") }}" method="POST" class="login">
                   <div class="field">
-                     <input type="text" placeholder="Email Address" required>
+                     <input type="text" placeholder="User ID" required>
                   </div>
                   <div class="field">
                      <input type="password" placeholder="Password" required>
@@ -243,12 +245,12 @@
                      <input type="submit" value="Login">
                   </div>
                   <div class="signup-link">
-                     Not a member? <a href="">Signup now</a>
+                     Not a member? <a href="">Register now</a>
                   </div>
                </form>
                <form action="{{ url_for("user_register") }}" class="signup">
                   <div class="field">
-                     <input type="text" placeholder="Email Address" required>
+                     <input type="text" placeholder="User ID" required>
                   </div>
                   <div class="field">
                     <input type="text" placeholder="First Name" required>
@@ -265,7 +267,7 @@
                   </div>
                   <div class="field btn">
                      <div class="btn-layer"></div>
-                     <input type="submit" value="Signup">
+                     <input type="submit" value="Register">
                   </div>
                </form>
             </div>
