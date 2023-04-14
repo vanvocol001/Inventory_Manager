@@ -1,7 +1,5 @@
 
 
-
-
 <!DOCTYPE html>
 <!-- Created By CodingNepal -->
 <html lang="en" dir="ltr">
@@ -214,10 +212,10 @@
       <div class="wrapper">
          <div class="title-text">
             <div class="title login">
-               Login 
+               Login Form
             </div>
             <div class="title signup">
-               Register Form
+               Signup Form
             </div>
          </div>
          <div class="form-container">
@@ -231,10 +229,11 @@
             <div class="form-inner">
                <form action="{{ url_for("user_login") }}" method="POST" class="login">
                   <div class="field">
-                     <input type="text" placeholder="User ID" required>
+                     <input type="text" placeholder="User ID" id="userid" name="userid" required>
                   </div>
                   <div class="field">
-                     <input type="password" placeholder="Password" required>
+                     <input type="password" placeholder="Password"
+                            id="password" name="password" required>
                   </div>
                 
                   <div class="pass-link">
@@ -250,19 +249,24 @@
                </form>
                <form action="{{ url_for("user_register") }}" class="signup">
                   <div class="field">
-                     <input type="text" placeholder="User ID" required>
+                     <input type="text" placeholder="User ID"
+                            id="userid" name="userid"required>
                   </div>
                   <div class="field">
-                    <input type="text" placeholder="First Name" required>
+                    <input type="text" placeholder="First Name"
+                           id="firstname" name="firstname" required>
                  </div>
                  <div class="field">
-                    <input type="text" placeholder="Last Name" required>
+                    <input type="text" placeholder="Last Name"
+                           id="lastname" name="lastname" required>
                  </div>
                   <div class="field">
-                     <input type="password" placeholder="Password"  minlength="8" required>
+                     <input type="password" placeholder="Password"
+                            id="password" name="password" minlength="8" required>
                   </div>
                   <div class="field">
-                     <input type="password" placeholder="Confirm password"  minlength="8" required>
+                     <input type="password" placeholder="Confirm password"
+                            id="passwordconfirm" name="passwordconfirm" minlength="8" required>
                      <span id="message"></span>
                   </div>
                   <div class="field btn">
