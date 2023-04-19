@@ -2,9 +2,12 @@
     <ul id="sidebaritems" class="nav nav-pills flex-column">
         <li class="nav-item"><a class="nav-link {% if request.url.path == "/homepage/" %}active{% endif %}"
                                 href="{{ url_for("get_homepage") }}">Homepage</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Testing</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Testing</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Testing</a></li>
+        <li class="nav-item"><a class="nav-link {% if request.url.path == "/products/" %}active{% endif %}"
+                                href="{{ url_for("read_inventory_items") }}">View Products</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Deliveries</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Dispoals</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Transactions</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Suppliers</a></li>
         {% if is_admin %}
             <hr class="mt-3 mb-2 w-75 ms-3">
             <li class="text-white">You're an admin! This is for testing!</li>
