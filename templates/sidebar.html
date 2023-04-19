@@ -4,10 +4,14 @@
                                 href="{{ url_for("get_homepage") }}">Homepage</a></li>
         <li class="nav-item"><a class="nav-link {% if request.url.path == "/products/" %}active{% endif %}"
                                 href="{{ url_for("read_inventory_items") }}">View Products</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Deliveries</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Dispoals</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Transactions</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Suppliers</a></li>
+        <li class="nav-item"><a class="nav-link {% if request.url.path == "/deliveries/" %}active{% endif %}"
+                                href="{{ url_for("read_deliveries") }}">Deliveries</a></li>
+        <li class="nav-item"><a class="nav-link {% if request.url.path == "/disposals/" %}active{% endif %}" 
+                                href="{{ url_for("read_disposals") }}">Dispoals</a></li>
+        <li class="nav-item"><a class="nav-link {% if request.url.path == "/transactions/" %}active{% endif %}" 
+                                href="{{ url_for("read_transactions") }}">Transactions</a></li>
+        <li class="nav-item"><a class="nav-link {% if request.url.path == "/suppliers/" %}active{% endif %}" 
+                                href="{{ url_for("read_suppliers") }}">Suppliers</a></li>
         {% if is_admin %}
             <hr class="mt-3 mb-2 w-75 ms-3">
             <li class="text-white">You're an admin! This is for testing!</li>
