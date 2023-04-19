@@ -30,6 +30,75 @@
                         <div class="card-text"><span class="infotext">Date Ordered: </span>{{ delivery.dateOrdered }}</div>
                         <div class="card-text"><span class="infotext">Date Expected: </span>{{ delivery.dateExpected }}</div>
                         <div class="card-text" style="font-size: x-small">Add a dropdown here to show products in delivery</div>
+                        <style>
+                            .dropbtn {
+                              background-color: orange;
+                              color: white;
+                              padding: 16px;
+                              font-size: 16px;
+                              border: none;
+                              cursor: pointer;
+                            }
+                            
+                            .dropbtn:hover, .dropbtn:focus {
+                              background-color: salmon;
+                            }
+                            
+                            .dropdown {
+                              position: relative;
+                              display: inline-block;
+                            }
+                            
+                            .dropdown-content {
+                              display: none;
+                              position: absolute;
+                              background-color: #f1f1f1;
+                              min-width: 160px;
+                              overflow: auto;
+                              box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+                              z-index: 1;
+                            }
+                            
+                            .dropdown-content a {
+                              color: black;
+                              padding: 12px 16px;
+                              text-decoration: none;
+                              display: block;
+                            }
+                            
+                            .dropdown a:hover {background-color: #ddd;}
+                            
+                            .show {display: block;}
+                            </style>
+                            </head>
+                            <body>
+                            
+                            <div class="dropdown">
+                              <button onclick="myFunction()" class="dropbtn">Dropdown</button>
+                              <div id="myDropdown" class="dropdown-content">
+                                <a href="#product">product</a>
+                              </div>
+                            </div>
+                            
+                            <script>
+                            
+                            function myFunction() {
+                              document.getElementById("myDropdown").classList.toggle("show");
+                            }
+                            window.onclick = function(event) {
+                              if (!event.target.matches('.dropbtn')) {
+                                var dropdowns = document.getElementsByClassName("dropdown-content");
+                                var i;
+                                for (i = 0; i < dropdowns.length; i++) {
+                                  var openDropdown = dropdowns[i];
+                                  if (openDropdown.classList.contains('show')) {
+                                    openDropdown.classList.remove('show');
+                                  }
+                                }
+                              }
+                            }
+                            </script>
+
                         {% for item, quantity in delivery.itemsOrdered.items() %}
                             <div class="card-text"><span class="infotext">{{ item }}: {{ quantity }}</span></div>
                         {% endfor %}
@@ -48,6 +117,73 @@
                         <div class="card-text"><span class="infotext">Reason: </span>{{ disposal.reason }}</div>
                         <div class="card-text"><span class="infotext">User: </span>{{ disposal.user }}</div>
                         <div class="card-text" style="font-size: x-small">Add a dropdown here to show products in disposal</div>
+                        <style>
+                            .dropbtn {
+                              background-color: orange;
+                              color: white;
+                              padding: 16px;
+                              font-size: 16px;
+                              border: none;
+                              cursor: pointer;
+                            }
+                            
+                            .dropbtn:hover, .dropbtn:focus {
+                              background-color: salmon;
+                            }
+                            
+                            .dropdown {
+                              position: relative;
+                              display: inline-block;
+                            }
+                            
+                            .dropdown-content {
+                              display: none;
+                              position: absolute;
+                              background-color: #f1f1f1;
+                              min-width: 160px;
+                              overflow: auto;
+                              box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+                              z-index: 1;
+                            }
+                            
+                            .dropdown-content a {
+                              color: black;
+                              padding: 12px 16px;
+                              text-decoration: none;
+                              display: block;
+                            }
+                            
+                            .dropdown a:hover {background-color: #ddd;}
+                            
+                            .show {display: block;}
+                            </style>
+                            </head>
+                            <body>
+                            
+                            <div class="dropdown">
+                              <button onclick="myFunction()" class="dropbtn">Dropdown</button>
+                              <div id="myDropdown" class="dropdown-content">
+                                <a href="#product">product</a>
+                              </div>
+                            </div>
+                        <script>
+                            
+                            function myFunction() {
+                              document.getElementById("myDropdown").classList.toggle("show");
+                            }
+                            window.onclick = function(event) {
+                              if (!event.target.matches('.dropbtn')) {
+                                var dropdowns = document.getElementsByClassName("dropdown-content");
+                                var i;
+                                for (i = 0; i < dropdowns.length; i++) {
+                                  var openDropdown = dropdowns[i];
+                                  if (openDropdown.classList.contains('show')) {
+                                    openDropdown.classList.remove('show');
+                                  }
+                                }
+                              }
+                            }
+                            </script>
                         {% for item, quantity in disposal.itemsDisposed.items() %}
                             <div class="card-text"><span class="infotext">{{ item }}: {{ quantity }}</span></div>
                         {% endfor %}
