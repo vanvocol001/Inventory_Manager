@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Deliveries - {{ user }}{% endblock %}
+{% block content %}
+    <div class="container ms-0 mt-2 mb-5">
+        <h3>Deliveries</h3>
+        <hr>
+        <div class="row">
+            {% for delivery in deliveries %}
+                <div class="card mt-1">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ delivery.deliveryid }}</h5>
+                        <!-- <div class="card-text">{{ user.firstName }} {{ user.lastName }}</div>
+                        <div class="card-text infotext">{{ user.accountLevel }}</div> -->
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock content %}
