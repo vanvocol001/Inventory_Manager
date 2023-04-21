@@ -177,7 +177,7 @@ def read_inventory_item(request: Request, productid: int, db: Session = Depends(
     product = crud.get_inventory_item(db, productid=productid)
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found")
-    return templates.TemplateResponse("overview.html", {"request": request, "products": [product]})
+    return templates.TemplateResponse("products.html", {"request": request, "products": [product]})
 
 
 @app.get("/products/", response_class=HTMLResponse)
@@ -195,6 +195,95 @@ def read_inventory_items(request: Request, skip: int = 0, limit: int = 100, db: 
         return {"error": "You must be logged in."}
 
 
+@app.get("/deliveries/{deliveryID}", response_class=HTMLResponse)
+def read_delivery(request: Request, deliveryid: int, db: Session = Depends(get_db)):
+    delivery = crud.get_delivery(db, deliveryid=deliveryid)
+    if delivery is None:
+        raise HTTPException(status_code=404, detail="Delivery not found")
+    return templates.TemplateResponse("deliveries.html", {"request": request, "deliveries": [delivery]})
+
+
+@app.get("/deliveries/", response_class=HTMLResponse)
+def read_deliveries(request: Request, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    cookie = request.cookies.get("_SESSION")
+    if cookie is not None:
+        session = crud.get_user_session(db, request.cookies.get("_SESSION"))
+        if session is not None:
+            deliveries = crud.get_deliveries(db, skip=skip, limit=limit)
+            return templates.TemplateResponse("deliveries.html", {"request": request, "deliveries": deliveries,
+                                                                "user": session.userID})
+        else:
+            return {"error": "You must be logged in."}
+    else:
+        return {"error": "You must be logged in."}
+
+@app.get("/disposals/{disposalID}", response_class=HTMLResponse)
+def read_disposal(request: Request, disposalid: int, db: Session = Depends(get_db)):
+    delivery = crud.get_delivery(db, disposalid=disposalid)
+    if disposal is None:
+        raise HTTPException(status_code=404, detail="Disposal not found")
+    return templates.TemplateResponse("disposals.html", {"request": request, "disposal": [disposal]})
+
+
+@app.get("/disposals/", response_class=HTMLResponse)
+def read_disposals(request: Request, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    cookie = request.cookies.get("_SESSION")
+    if cookie is not None:
+        session = crud.get_user_session(db, request.cookies.get("_SESSION"))
+        if session is not None:
+            disposals = crud.get_disposals(db, skip=skip, limit=limit)
+            return templates.TemplateResponse("disposals.html", {"request": request, "disposals": disposals,
+                                                                "user": session.userID})
+        else:
+            return {"error": "You must be logged in."}
+    else:
+        return {"error": "You must be logged in."}
+
+@app.get("/transactions/{transactionID}", response_class=HTMLResponse)
+def read_transaction(request: Request, transactionid: int, db: Session = Depends(get_db)):
+    transaction = crud.get_transaction(db, transactionid=transactionid)
+    if transaction is None:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    return templates.TemplateResponse("transactions.html", {"request": request, "transaction": [transaction]})
+
+
+@app.get("/transactions/", response_class=HTMLResponse)
+def read_transactions(request: Request, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    cookie = request.cookies.get("_SESSION")
+    if cookie is not None:
+        session = crud.get_user_session(db, request.cookies.get("_SESSION"))
+        if session is not None:
+            transactions = crud.get_transactions(db, skip=skip, limit=limit)
+            return templates.TemplateResponse("transactions.html", {"request": request, "transactions": transactions,
+                                                                "user": session.userID})
+        else:
+            return {"error": "You must be logged in."}
+    else:
+        return {"error": "You must be logged in."}
+
+@app.get("/suppliers/{supplierID}", response_class=HTMLResponse)
+def read_supplier(request: Request, supplierid: int, db: Session = Depends(get_db)):
+    supplier = crud.supplier(db, supplierid=supplierid)
+    if supplier is None:
+        raise HTTPException(status_code=404, detail="Supplier not found")
+    return templates.TemplateResponse("suppliers.html", {"request": request, "supplier": [supplier]})
+
+
+@app.get("/suppliers/", response_class=HTMLResponse)
+def read_suppliers(request: Request, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    cookie = request.cookies.get("_SESSION")
+    if cookie is not None:
+        session = crud.get_user_session(db, request.cookies.get("_SESSION"))
+        if session is not None:
+            suppliers = crud.get_suppliers(db, skip=skip, limit=limit)
+            return templates.TemplateResponse("suppliers.html", {"request": request, "suppliers": suppliers,
+                                                                "user": session.userID})
+        else:
+            return {"error": "You must be logged in."}
+    else:
+        return {"error": "You must be logged in."}
+    
+
 @app.get("/suppliers/{supplierid}", response_model=schemas.Supplier)
 def read_supplier(supplierid: int, db: Session = Depends(get_db)):
     supplier = crud.get_supplier(db, supplierid=supplierid)
@@ -207,6 +296,8 @@ def read_supplier(supplierid: int, db: Session = Depends(get_db)):
 def read_suppliers(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     suppliers = crud.get_suppliers(db, skip=skip, limit=limit)
     return suppliers
+
+
 
 
 @app.get("/users/{userid}", response_model=schemas.User)

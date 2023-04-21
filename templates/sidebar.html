@@ -7,7 +7,7 @@
         <li class="nav-item"><a class="nav-link {% if request.url.path == "/deliveries/" %}active{% endif %}"
                                 href="{{ url_for("read_deliveries") }}">Deliveries</a></li>
         <li class="nav-item"><a class="nav-link {% if request.url.path == "/disposals/" %}active{% endif %}" 
-                                href="{{ url_for("read_disposals") }}">Dispoals</a></li>
+                                href="{{ url_for("read_disposals") }}">Disposals</a></li>
         <li class="nav-item"><a class="nav-link {% if request.url.path == "/transactions/" %}active{% endif %}" 
                                 href="{{ url_for("read_transactions") }}">Transactions</a></li>
         <li class="nav-item"><a class="nav-link {% if request.url.path == "/suppliers/" %}active{% endif %}" 
