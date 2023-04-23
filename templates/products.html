@@ -1,16 +1,50 @@
 {% extends "base.html" %}
 {% block title %}Products - {{ user }}{% endblock %}
+{% block scripts %}
+{% endblock scripts %}
+{% block modal %}
+    <div class="modal fade" id="insertProductModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add a New Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    The form goes here
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Submit product</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock modal %}
 {% block content %}
-    <div class="container ms-0 mt-2 mb-5">
-        <h3>Products</h3>
-        <hr>
+    <div class="container-fluid ms-0 mt-2 mb-5">
         <div class="row">
+            <h3 class="col">Products</h3>
+            <div class="col">
+                <button type="button" class="btn btn-warning float-end" data-bs-toggle="modal" data-bs-target="#insertProductModal">
+                    Add a new product
+                </button>
+            </div>
+        </div>
+        <hr>
+        <div class="row row-cols-1 row-cols-md-3">
             {% for product in products %}
-                <div class="card mt-1">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ product.productID }}</h5>
-                        <!-- <div class="card-text">{{ user.firstName }} {{ user.lastName }}</div>
-                        <div class="card-text infotext">{{ user.accountLevel }}</div> -->
+                <div class="col mt-3">
+                    <div class="card p-0">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-2 text-muted fs-6">#{{ product.productID }}</div>
+                                <h5 class="col card-title">{{ product.description }}</h5>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-text">{{ product.stock }} / {{ product.restockLimit }}</div>
+                        </div>
                     </div>
                 </div>
             {% endfor %}

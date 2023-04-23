@@ -1,16 +1,35 @@
 {% extends "base.html" %}
 {% block title %}Deliveries - {{ user }}{% endblock %}
 {% block content %}
-    <div class="container ms-0 mt-2 mb-5">
+    <div class="container-fluid ms-0 mt-2 mb-5">
         <h3>Deliveries</h3>
         <hr>
         <div class="row">
-            {% for delivery in deliveries %}
-                <div class="card mt-1">
+            {% for deliveryID, delivery in deliveries.items() %}
+                <div class="card mt-1 p-0">
                     <div class="card-body">
-                        <h5 class="card-title">{{ delivery.deliveryid }}</h5>
-                        <!-- <div class="card-text">{{ user.firstName }} {{ user.lastName }}</div>
-                        <div class="card-text infotext">{{ user.accountLevel }}</div> -->
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="card-title col-8 text-muted fs-6">#{{ deliveryID }}</div>
+                                <div class="col-2 text-muted">Date Ordered:</div>
+                                <div class="col-2">{{ delivery.dateOrdered }}</div>
+                            </div>
+                            <div class="row justify-content-end">
+                                <div class="col-2 text-muted">Date Expected:</div>
+                                <div class="col-2">{{ delivery.dateExpected }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="container-fluid">
+                            <!-- PRETTY THIS UP LATER AND GET ACTUAL PRODUCT NAMES -->
+                            {% for item, quantity in delivery.itemsOrdered.items() %}
+                                <div class="row">
+                                    <div class="col-1">{{ item }}</div>
+                                    <div class="col-1 text-muted">x{{ quantity }}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
             {% endfor %}

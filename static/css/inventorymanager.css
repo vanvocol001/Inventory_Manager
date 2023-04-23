@@ -72,3 +72,7 @@ body {
 hr {
     margin-top: 0;
 }
+
+.card-title {
+    margin-bottom: 0;
+}

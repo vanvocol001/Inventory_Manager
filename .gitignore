@@ -4,3 +4,4 @@ venv/
 .idea/
 .space
 Spacefile
+__pycache__/
