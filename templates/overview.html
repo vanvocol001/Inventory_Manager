@@ -2,181 +2,109 @@
 {% block title %}Overview - {{ user }}{% endblock %}
 {% block content %}
     <div class="container-fluid ms-0 mt-2 mb-5">
-        <div class="row justify-content-start">
-            <div id="products" class="col-3">
+        <div class="row row-cols-1 row-cols-xl-3">
+            <div id="products" class="col mt-2">
             <h3>Product Overview</h3>
             <hr>
             {% for product in products %}
-                <div class="card mt-1">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ product.description }}</h5>
-                        <div class="card-text"><span class="infotext">Supplier ID: </span>{{ product.supplierID }}</div>
-                        <div class="d-flex justify-content-between">
-                            <div class="card-text"><span class="infotext">Product No: </span>{{ product.productID }}</div>
-                            <div class="card-text"><span style="{{ 'color: red' if product.stock < product.restockLimit
+                <div class="mt-3">
+                    <div class="card h-100 p-0">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col text-muted fs-6">#{{ product.productID }}</div>
+                                <div class="col">
+                                    <h5 class="float-end mb-0">{{ product.description }}</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body row">
+                            <div class="col">
+                                <div class="card-text col float-end"><span style="{{ 'color: red' if product.stock < product.restockLimit
                                     else 'color: green' }}">{{ product.stock }}</span> / {{ product.restockLimit }}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
             {% endfor %}
             </div>
-            <div id="deliveries" class="col-3">
+            <div id="deliveries" class="col mt-2">
             <h3>Deliveries</h3>
             <hr>
             {% for deliveryID, delivery in deliveries.items() %}
-                <div class="card mt-1">
-                    <div class="card-body">
-                        <h5 class="card-title">#{{ deliveryID }}</h5>
-                        <div class="card-text"><span class="infotext">Date Ordered: </span>{{ delivery.dateOrdered }}</div>
-                        <div class="card-text"><span class="infotext">Date Expected: </span>{{ delivery.dateExpected }}</div>
-                        <div class="card-text" style="font-size: x-small">Add a dropdown here to show products in delivery</div>
-                        <style>
-                            .dropbtn {
-                              background-color: orange;
-                              color: white;
-                              padding: 12px;
-                              font-size: 10px;
-                              border: none;
-                              cursor: pointer;
-                            }                       
-                            .dropbtn:hover, .dropbtn:focus {
-                              background-color: salmon;
-                            }                           
-                            .dropdown {
-                              position: relative;
-                              display: inline-block;
-                            }                            
-                            .dropdown-content {
-                              display: none;
-                              position: absolute;
-                              background-color: #f1f1f1;
-                              min-width: 160px;
-                              overflow: auto;
-                              box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-                              z-index: 1;
-                            }                           
-                            .dropdown-content a {
-                              color: black;
-                              padding: 12px 16px;
-                              text-decoration: none;
-                              display: block;
-                            }                           
-                            .dropdown a:hover {background-color: #ddd;}
-                            
-                            .show {display: block;}
-                            </style>
-                            </head>
-                            <body>
-                            
-                            <div class="dropdown">
-                              <button onclick="myFunction()" class="dropbtn">Dropdown</button>
-                              <div id="Dropdown" class="dropdown-content">
-                                <a href="#product">product</a>
-                              </div>
+                <div class="mt-3">
+                    <div class="card p-0 h-100">
+                        <div class="card-header">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="card-title col-2 text-muted fs-6">#{{ deliveryID }}</div>
+                                    <div class="col">
+                                        <div class="float-end"><span class="text-muted">Date Ordered:</span> {{ delivery.dateOrdered }}</div>
+                                    </div>
+                                </div>
+                                <div class="row justify-content-end">
+                                    <div class="col">
+                                        <div class="float-end"><span class="text-muted">Date Expected:</span> {{ delivery.dateExpected }}</div>
+                                    </div>
+                                </div>
                             </div>
-                            
-                            <script>
-                            
-                            function myFunction() {
-                              document.getElementById("Dropdown").classList.toggle("show");
-                            }
-                            window.onclick = function(event) {
-                              if (!event.target.matches('.dropbtn')) {
-                                var dropdowns = document.getElementsByClassName("dropdown-content");
-                                var i;
-                                for (i = 0; i < dropdowns.length; i++) {
-                                  var openDropdown = dropdowns[i];
-                                  if (openDropdown.classList.contains('show')) {
-                                    openDropdown.classList.remove('show');
-                                  }
-                                }
-                              }
-                            }
-                            </script>
-
-                        {% for item, quantity in delivery.itemsOrdered.items() %}
-                            <div class="card-text"><span class="infotext">{{ item }}: {{ quantity }}</span></div>
-                        {% endfor %}
+                        </div>
+                        <div class="card-body">
+                            <div class="container-fluid">
+                                {% for item, quantity in delivery.itemsOrdered.items() %}
+                                    <div class="row">
+                                        <div class="col-3">{{ item }}</div>
+                                        <div class="col-3 text-muted">x{{ quantity }}</div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
                     </div>
                 </div>
             {% endfor %}
             </div>
-            <div id="disposals" class="col-3">
+            <div id="disposals" class="col mt-2">
             <h3>Disposals</h3>
             <hr>
             {% for disposalID, disposal in disposals.items() %}
-                <div class="card mt-1">
-                    <div class="card-body">
-                        <h5 class="card-title">#{{ disposalID }}</h5>
-                        <div class="card-text"><span class="infotext">Date Disposed: </span>{{ disposal.dateDisposed }}</div>
-                        <div class="card-text"><span class="infotext">Reason: </span>{{ disposal.reason }}</div>
-                        <div class="card-text"><span class="infotext">User: </span>{{ disposal.user }}</div>
-                        <div class="card-text" style="font-size: x-small">Add a dropdown here to show products in disposal</div>
-                        <style>
-                            .dropbtn {
-                              background-color: orange;
-                              color: white;
-                              padding: 12px;
-                              font-size: 10px;
-                              border: none;
-                              cursor: pointer;
-                            }                           
-                            .dropbtn:hover, .dropbtn:focus {
-                              background-color: salmon;
-                            }                            
-                            .dropdown {
-                              position: relative;
-                              display: inline-block;
-                            }                            
-                            .dropdown-content {
-                              display: none;
-                              position: absolute;
-                              background-color: #f1f1f1;
-                              min-width: 160px;
-                              overflow: auto;
-                              box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-                              z-index: 1;
-                            }                           
-                            .dropdown-content a {
-                              color: black;
-                              padding: 12px 16px;
-                              text-decoration: none;
-                              display: block;
-                            }                          
-                            .dropdown a:hover {background-color: #ddd;}
-                            
-                            .show {display: block;}
-                            </style>
-                            </head>
-                            <body>
-                            
-                            <div class="dropdown">
-                              <button onclick="MyFunction()" class="dropbtn">Dropdown</button>
-                              <div id="myDropdown" class="dropdown-content">
-                                <a href="#product">product</a>
-                              </div>
+                <div class="mt-3">
+                    <div class="card p-0 h-100">
+                        <div class="card-header">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="card-title col-5 text-muted fs-6">#{{ disposalID }}</div>
+                                    <div class="col">
+                                        <div class="float-end"><span class="text-muted">Date Disposed:</span> {{ disposal.dateDisposed }}</div>
+                                    </div>
+                                </div>
                             </div>
-                        <script>
-                            
-                            function MyFunction() {
-                              document.getElementById("myDropdown").classList.toggle("show");
-                            }
-                            window.onclick = function(event) {
-                              if (!event.target.matches('.dropbtn')) {
-                                var dropdowns = document.getElementsByClassName("dropdown-content");
-                                var i;
-                                for (i = 0; i < dropdowns.length; i++) {
-                                  var openDropdown = dropdowns[i];
-                                  if (openDropdown.classList.contains('show')) {
-                                    openDropdown.classList.remove('show');
-                                  }
-                                }
-                              }
-                            }
-                            </script>
-                        {% for item, quantity in disposal.itemsDisposed.items() %}
-                            <div class="card-text"><span class="infotext">{{ item }}: {{ quantity }}</span></div>
-                        {% endfor %}
+                        </div>
+                        <div class="card-body">
+                            <div class="container-fluid">
+                            {% for item, quantity in disposal.itemsDisposed.items() %}
+                                <div class="row">
+                                    <div class="col-md-6 col-lg-4">
+                                        {{ item }}
+                                    </div>
+                                    <div class="col">
+                                        <span class="text-muted">x{{ quantity }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    {{ disposal.reason }}
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="float-end text-muted">{{ disposal.user }}</div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             {% endfor %}

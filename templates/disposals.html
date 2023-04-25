@@ -1,16 +1,50 @@
 {% extends "base.html" %}
 {% block title %}Disposals - {{ user }}{% endblock %}
 {% block content %}
-    <div class="container ms-0 mt-2 mb-5">
+    <div class="container-fluid ms-0 mt-2 mb-5">
         <h3>Disposals</h3>
         <hr>
-        <div class="row">
-            {% for disposal in disposals %}
-                <div class="card mt-1">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ disposal.disposalID }}</h5>
-                        <!-- <div class="card-text">{{ user.firstName }} {{ user.lastName }}</div>
-                        <div class="card-text infotext">{{ user.accountLevel }}</div> -->
+        <div class="row row-cols-1 row-cols-lg-3">
+            {% for disposalID, disposal in disposals.items() %}
+                <div class="col mt-3">
+                    <div class="card p-0 h-100">
+                        <div class="card-header">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="card-title col-5 text-muted fs-6">#{{ disposalID }}</div>
+                                    <div class="col">
+                                        <div class="float-end"><span class="text-muted">Date Disposed:</span> {{ disposal.dateDisposed }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="container-fluid">
+                            {% for item, quantity in disposal.itemsDisposed.items() %}
+                                <div class="row">
+                                    <div class="col-md-6 col-lg-4">
+                                        {{ item }}
+                                    </div>
+                                    <div class="col">
+                                        <span class="text-muted">x{{ quantity }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    {{ disposal.reason }}
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="float-end text-muted">{{ disposal.user }}</div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             {% endfor %}

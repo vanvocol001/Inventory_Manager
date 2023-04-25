@@ -44,11 +44,11 @@ def get_deliveries(db: Session, skip: int = 0, limit: int = 100):
 
 
 def get_items_from_delivery(db: Session, deliveryid: int):
-    return db.query(models.InventoryOrder).filter(models.InventoryOrder.deliveryID == deliveryid).all()
+    return db.query(models.InventoryOrder, models.InventoryItem).join(models.InventoryItem).filter(models.InventoryOrder.deliveryID == deliveryid).all()
 
 
 def get_items_from_disposal(db: Session, disposalid: int):
-    return db.query(models.DisposedInventoryReport).filter(models.DisposedInventoryReport.disposalID == disposalid).all()
+    return db.query(models.DisposedInventoryReport, models.InventoryItem).join(models.InventoryItem).filter(models.DisposedInventoryReport.disposalID == disposalid).all()
 
 
 def get_disposal(db: Session, disposalid: int):
@@ -61,3 +61,11 @@ def get_disposals(db: Session, skip: int = 0, limit: int = 100):
 
 def get_user_session(db: Session, cookie_value: str):
     return db.query(models.Session).filter(models.Session.cookie == cookie_value).first()
+
+
+def add_inventory_item(db: Session, product_description: str, supplier_id: int, stock: int, restock_limit: int):
+    new_product = models.InventoryItem(description=product_description, supplierID=supplier_id, stock=stock,
+                                       restockLimit=restock_limit, image=None)
+    db.add(new_product)
+    db.commit()
+    return

@@ -20,7 +20,7 @@ class InventoryItem(Base):
 
     productID = Column(Integer, primary_key=True)
     description = Column(String)
-    supplierID = Column(Integer, ForeignKey("Supplier.supplierID"))
+    supplierID = Column(Integer, ForeignKey("supplier.supplierID"))
     stock = Column(Integer)
     restockLimit = Column(Integer)
     image = Column(String)

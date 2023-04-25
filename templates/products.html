@@ -10,20 +10,34 @@
                     <h5 class="modal-title">Add a New Product</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    The form goes here
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Submit product</button>
-                </div>
+                <form action="{{ url_for("add_product") }}" method="POST">
+                    <div class="modal-body">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <input type="text" class="form-control col-12 mt-2" id="productdescription" name="product_description" placeholder="Product Name" required>
+                                <select class="form-select col-6 mt-2" id="supplier" name="supplier"  required>
+                                    <option selected disabled value="">Choose Supplier...</option>
+                                    {% for supplier in suppliers %}
+                                        <option value="{{ supplier.supplierID }}">{{ supplier.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <input type="number" class="form-control col mt-2 me-1" id="stock" name="stock"  placeholder="Stock" pattern="\d*" min="0" required>
+                                <input type="number" class="form-control col mt-2 ms-1" id="restocklimit" name="restock_limit" placeholder="Restock Warning Amount" pattern="\d*" min="0" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Submit product</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 {% endblock modal %}
 {% block content %}
     <div class="container-fluid ms-0 mt-2 mb-5">
-        <div class="row">
+        <div class="row mb-2">
             <h3 class="col">Products</h3>
             <div class="col">
                 <button type="button" class="btn btn-warning float-end" data-bs-toggle="modal" data-bs-target="#insertProductModal">
@@ -32,18 +46,23 @@
             </div>
         </div>
         <hr>
-        <div class="row row-cols-1 row-cols-md-3">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
             {% for product in products %}
                 <div class="col mt-3">
-                    <div class="card p-0">
+                    <div class="card h-100 p-0">
                         <div class="card-header">
                             <div class="row">
-                                <div class="col-2 text-muted fs-6">#{{ product.productID }}</div>
-                                <h5 class="col card-title">{{ product.description }}</h5>
+                                <div class="col text-muted fs-6">#{{ product.productID }}</div>
+                                <div class="col">
+                                    <h5 class="float-end mb-0">{{ product.description }}</h5>
+                                </div>
                             </div>
                         </div>
-                        <div class="card-body">
-                            <div class="card-text">{{ product.stock }} / {{ product.restockLimit }}</div>
+                        <div class="card-body row">
+                            <div class="col">
+                                <div class="card-text col float-end"><span style="{{ 'color: red' if product.stock < product.restockLimit
+                                    else 'color: green' }}">{{ product.stock }}</span> / {{ product.restockLimit }}</div>
+                            </div>
                         </div>
                     </div>
                 </div>

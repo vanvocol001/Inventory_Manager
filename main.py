@@ -1,6 +1,3 @@
-from typing import List
-from collections import defaultdict
-
 import hashlib
 import uvicorn
 import secrets
@@ -50,12 +47,10 @@ def collate_deliveries(db: Session = Depends(get_db), skip: int = 0, limit: int 
                 "itemsOrdered": {},
             }
 
-        currentDelivery = deliveries_dict[delivery.deliveryID]
-        itemsOrdered = crud.get_items_from_delivery(db, delivery.deliveryID)
-        for item in itemsOrdered:
-            # GET ACTUAL PRODUCT NAMES LATER, NOT PRODUCT IDS.
-            # Join Deliveries on InventoryItems with ProductID as the key
-            currentDelivery["itemsOrdered"][item.productID] = item.quantityOrdered
+        current_delivery = deliveries_dict[delivery.deliveryID]
+        items_ordered = crud.get_items_from_delivery(db, delivery.deliveryID)
+        for order, item in items_ordered:
+            current_delivery["itemsOrdered"][item.description] = order.quantityOrdered
     return deliveries_dict
 
 
@@ -76,8 +71,8 @@ def collate_disposals(db: Session = Depends(get_db), skip: int = 0, limit: int =
 
         current_disposal = disposals_dict[disposal.disposalID]
         items_disposed = crud.get_items_from_disposal(db, disposal.disposalID)
-        for item in items_disposed:
-            current_disposal["itemsDisposed"][item.productID] = item.quantityDisposed
+        for disposal_report, item in items_disposed:
+            current_disposal["itemsDisposed"][item.description] = disposal_report.quantityDisposed
     return disposals_dict
 
 
@@ -160,6 +155,17 @@ def user_register(userid: str = Form(...), firstname: str = Form(...), lastname:
     return redirect_response
 
 
+@app.post("/add_product")
+def add_product(product_description: str = Form(...), supplier: int = Form(...), stock: int = Form(...),
+                restock_limit: int = Form(...), db: Session = Depends(get_db)):
+    verify_supplier = crud.get_supplier(db, supplierid=supplier)
+    if verify_supplier is not None:
+        crud.add_inventory_item(db, product_description, supplier, stock, restock_limit)
+        redirect_response = RedirectResponse(url="/products", status_code=302)
+        return redirect_response
+    return RedirectResponse(url="/homepage", status_code=302)
+
+
 @app.get("/homepage/", response_class=HTMLResponse)
 def get_homepage(request: Request, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     user = get_user_from_cookie(request, db)
@@ -187,9 +193,10 @@ def read_inventory_items(request: Request, skip: int = 0, limit: int = 100, db: 
     user = get_user_from_cookie(request, db)
     if user is not None:
         inventory_items = crud.get_inventory_items(db, skip=skip, limit=limit)
+        suppliers = crud.get_suppliers(db, skip=skip, limit=limit)
         is_admin = is_user_admin(user, db)
         return templates.TemplateResponse("products.html", {"request": request, "products": inventory_items,
-                                                            "user": user, "is_admin": is_admin})
+                                                            "suppliers": suppliers, "user": user, "is_admin": is_admin})
     else:
         return {"error": "You must be logged in."}
 
@@ -226,7 +233,7 @@ def read_disposal(request: Request, disposalid: int, db: Session = Depends(get_d
 def read_disposals(request: Request, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     user = get_user_from_cookie(request, db)
     if user is not None:
-        disposals = crud.get_disposals(db, skip=skip, limit=limit)
+        disposals = collate_disposals(db, skip=skip, limit=limit)
         is_admin = is_user_admin(user, db)
         return templates.TemplateResponse("disposals.html", {"request": request, "disposals": disposals,
                                                              "user": user, "is_admin": is_admin})
