@@ -1,3 +1,5 @@
+from typing import List
+
 import hashlib
 import uvicorn
 import secrets
@@ -33,47 +35,14 @@ def get_db():
         db.close()
 
 
-def collate_deliveries(db: Session = Depends(get_db), skip: int = 0, limit: int = 100):
-    deliveries_dict = {}
-    deliveries = crud.get_deliveries(db, skip=skip, limit=limit)
-
-    for delivery in deliveries:
-        # Setup default dict for new delivery IDs
-        if delivery.deliveryID not in deliveries_dict:
-            deliveries_dict[delivery.deliveryID] = {
-                "deliveryID": delivery.deliveryID,
-                "dateExpected": delivery.dateExpected,
-                "dateOrdered": delivery.dateOrdered,
-                "itemsOrdered": {},
-            }
-
-        current_delivery = deliveries_dict[delivery.deliveryID]
-        items_ordered = crud.get_items_from_delivery(db, delivery.deliveryID)
-        for order, item in items_ordered:
-            current_delivery["itemsOrdered"][item.description] = order.quantityOrdered
-    return deliveries_dict
-
-
-def collate_disposals(db: Session = Depends(get_db), skip: int = 0, limit: int = 100):
-    disposals_dict = {}
-    disposals = crud.get_disposals(db, skip=skip, limit=limit)
-
-    for disposal in disposals:
-        # Setup default dict for new disposal IDs
-        if disposal.disposalID not in disposals_dict:
-            disposals_dict[disposal.disposalID] = {
-                "disposalID": disposal.disposalID,
-                "dateDisposed": disposal.dateDisposed,
-                "reason": disposal.reason,
-                "user": disposal.userID,
-                "itemsDisposed": {},
-            }
-
-        current_disposal = disposals_dict[disposal.disposalID]
-        items_disposed = crud.get_items_from_disposal(db, disposal.disposalID)
-        for disposal_report, item in items_disposed:
-            current_disposal["itemsDisposed"][item.description] = disposal_report.quantityDisposed
-    return disposals_dict
+def confirm_delivery(delivery_id: int, db: Session = Depends(get_db)) -> bool:
+    delivery = crud.get_delivery(db, delivery_id)
+    if delivery is not None:
+        items = crud.get_items_from_delivery(db, delivery_id)
+        for order, item in items:
+            crud.add_to_stock(db, item.productID, order.quantityOrdered)
+        return crud.set_delivery_confirmed(db, delivery_id)
+    return False
 
 
 def get_user_from_cookie(request: Request, db: Session = Depends(get_db)):
@@ -156,14 +125,31 @@ def user_register(userid: str = Form(...), firstname: str = Form(...), lastname:
 
 
 @app.post("/add_product")
-def add_product(product_description: str = Form(...), supplier: int = Form(...), stock: int = Form(...),
-                restock_limit: int = Form(...), db: Session = Depends(get_db)):
-    verify_supplier = crud.get_supplier(db, supplierid=supplier)
+def add_product_endpoint(product_description: str = Form(...), supplier_id: int = Form(...), stock: int = Form(...),
+                         restock_limit: int = Form(...), db: Session = Depends(get_db)):
+    verify_supplier = crud.get_supplier(db, supplier_id)
     if verify_supplier is not None:
-        crud.add_inventory_item(db, product_description, supplier, stock, restock_limit)
+        crud.add_inventory_item(db, product_description, supplier_id, stock, restock_limit)
         redirect_response = RedirectResponse(url="/products", status_code=302)
         return redirect_response
     return RedirectResponse(url="/homepage", status_code=302)
+
+
+@app.post("/add_delivery")
+async def add_delivery_endpoint(date: str = Form(...), supplier_id: int = Form(...), product: List[int] = Form(...),
+                                stock: List[int] = Form(...), db: Session = Depends(get_db)):
+    print(date)
+    print(supplier_id)
+    print(product)
+    print(stock)
+
+    return RedirectResponse("/deliveries", status_code=302)
+
+
+@app.get("/confirm_delivery/")
+async def confirm_delivery_endpoint(delivery_id: int, db: Session = Depends(get_db)):
+    confirm_delivery(delivery_id, db)
+    return RedirectResponse("/deliveries", status_code=302)
 
 
 @app.get("/homepage/", response_class=HTMLResponse)
@@ -171,8 +157,8 @@ def get_homepage(request: Request, skip: int = 0, limit: int = 100, db: Session 
     user = get_user_from_cookie(request, db)
     if user is not None:
         inventory_items = crud.get_inventory_items(db, skip=skip, limit=limit)
-        deliveries = collate_deliveries(db, skip=skip, limit=limit)
-        disposals = collate_disposals(db, skip=skip, limit=limit)
+        deliveries = crud.get_deliveries(db, skip=skip, limit=limit)
+        disposals = crud.get_disposals(db, skip=skip, limit=limit)
         is_admin = is_user_admin(user, db)
         return templates.TemplateResponse("overview.html", {"request": request, "products": inventory_items,
                                                             "deliveries": deliveries, "disposals": disposals,
@@ -213,9 +199,12 @@ def read_delivery(request: Request, deliveryid: int, db: Session = Depends(get_d
 def read_deliveries(request: Request, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     user = get_user_from_cookie(request, db)
     if user is not None:
-        deliveries = collate_deliveries(db, skip=skip, limit=limit)
+        deliveries = crud.get_deliveries(db, skip=skip, limit=limit)
+        products = crud.get_inventory_items(db, skip=skip, limit=limit)
+        suppliers = crud.get_suppliers(db, skip=skip, limit=limit)
         is_admin = is_user_admin(user, db)
         return templates.TemplateResponse("deliveries.html", {"request": request, "deliveries": deliveries,
+                                                              "products": products, "suppliers": suppliers,
                                                               "user": user, "is_admin": is_admin})
     else:
         return {"error": "You must be logged in."}
@@ -233,7 +222,7 @@ def read_disposal(request: Request, disposalid: int, db: Session = Depends(get_d
 def read_disposals(request: Request, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     user = get_user_from_cookie(request, db)
     if user is not None:
-        disposals = collate_disposals(db, skip=skip, limit=limit)
+        disposals = crud.get_disposals(db, skip=skip, limit=limit)
         is_admin = is_user_admin(user, db)
         return templates.TemplateResponse("disposals.html", {"request": request, "disposals": disposals,
                                                              "user": user, "is_admin": is_admin})

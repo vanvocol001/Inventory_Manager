@@ -30,48 +30,50 @@
             <div id="deliveries" class="col mt-2">
             <h3>Deliveries</h3>
             <hr>
-            {% for deliveryID, delivery in deliveries.items() %}
-                <div class="mt-3">
-                    <div class="card p-0 h-100">
-                        <div class="card-header">
-                            <div class="container-fluid">
-                                <div class="row">
-                                    <div class="card-title col-2 text-muted fs-6">#{{ deliveryID }}</div>
-                                    <div class="col">
-                                        <div class="float-end"><span class="text-muted">Date Ordered:</span> {{ delivery.dateOrdered }}</div>
+            {% for delivery in deliveries %}
+                {% if not delivery.delivered %}
+                    <div class="col mt-3">
+                        <div class="card p-0 h-100">
+                            <div class="card-header">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="card-title col-2 text-muted fs-6">#{{ delivery.deliveryID }}</div>
+                                        <div class="col">
+                                            <div class="float-end"><span class="text-muted">Date Ordered:</span> {{ delivery.dateOrdered }}</div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="row justify-content-end">
-                                    <div class="col">
-                                        <div class="float-end"><span class="text-muted">Date Expected:</span> {{ delivery.dateExpected }}</div>
+                                    <div class="row justify-content-end">
+                                        <div class="col">
+                                            <div class="float-end"><span class="text-muted">Date Expected:</span> {{ delivery.dateExpected }}</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="container-fluid">
-                                {% for item, quantity in delivery.itemsOrdered.items() %}
-                                    <div class="row">
-                                        <div class="col-3">{{ item }}</div>
-                                        <div class="col-3 text-muted">x{{ quantity }}</div>
-                                    </div>
-                                {% endfor %}
+                            <div class="card-body">
+                                <div class="container-fluid">
+                                    {% for order in delivery.items %}
+                                        <div class="row">
+                                            <div class="col-3">{{ order.product.description }}</div>
+                                            <div class="col-3 text-muted">x{{ order.quantityOrdered }}</div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                {% endif %}
             {% endfor %}
             </div>
             <div id="disposals" class="col mt-2">
             <h3>Disposals</h3>
             <hr>
-            {% for disposalID, disposal in disposals.items() %}
-                <div class="mt-3">
+            {% for disposal in disposals %}
+                <div class="col mt-3">
                     <div class="card p-0 h-100">
                         <div class="card-header">
                             <div class="container-fluid">
                                 <div class="row">
-                                    <div class="card-title col-5 text-muted fs-6">#{{ disposalID }}</div>
+                                    <div class="card-title col-5 text-muted fs-6">#{{ disposal.disposalID }}</div>
                                     <div class="col">
                                         <div class="float-end"><span class="text-muted">Date Disposed:</span> {{ disposal.dateDisposed }}</div>
                                     </div>
@@ -80,13 +82,13 @@
                         </div>
                         <div class="card-body">
                             <div class="container-fluid">
-                            {% for item, quantity in disposal.itemsDisposed.items() %}
+                            {% for item in disposal.items %}
                                 <div class="row">
                                     <div class="col-md-6 col-lg-4">
-                                        {{ item }}
+                                        {{ item.product.description }}
                                     </div>
                                     <div class="col">
-                                        <span class="text-muted">x{{ quantity }}</span>
+                                        <span class="text-muted">x{{ item.quantityDisposed }}</span>
                                     </div>
                                 </div>
                             {% endfor %}
@@ -99,9 +101,8 @@
                                 </div>
                                 <div class="row">
                                     <div class="col">
-                                        <div class="float-end text-muted">{{ disposal.user }}</div>
+                                        <div class="float-end text-muted">{{ disposal.userID }}</div>
                                     </div>
-
                                 </div>
                             </div>
                         </div>

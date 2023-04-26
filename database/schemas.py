@@ -61,6 +61,7 @@ class Delivery(ORMModel):
     dateOrdered: date
     dateExpected: date
     supplierID: int
+    delivered: bool
 
     items: list[InventoryOrder] = []
 

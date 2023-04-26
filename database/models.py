@@ -58,6 +58,8 @@ class InventoryOrder(Base):
     productID = Column(Integer, ForeignKey("inventoryitem.productID"), primary_key=True, index=True)
     quantityOrdered = Column(Integer)
 
+    product = relationship("InventoryItem")
+
 
 class Delivery(Base):
     __tablename__ = "delivery"
@@ -66,6 +68,7 @@ class Delivery(Base):
     dateOrdered = Column(Date, server_default=func.now())
     dateExpected = Column(Date)
     supplierID = Column(Integer, ForeignKey("supplier.supplierID"))
+    delivered = Column(Boolean)
 
     items = relationship("InventoryOrder")
 
@@ -77,6 +80,8 @@ class DisposedInventoryReport(Base):
     productID = Column(Integer, ForeignKey("inventoryitem.productID"), primary_key=True)
     quantityDisposed = Column(Integer)
 
+    product = relationship("InventoryItem")
+
 
 class DisposedInventory(Base):
     __tablename__ = "disposedinventory"
@@ -86,7 +91,7 @@ class DisposedInventory(Base):
     reason = Column(String)
     userID = Column(String, ForeignKey("user.userID"))
 
-    disposalReport = relationship("DisposedInventoryReport")
+    items = relationship("DisposedInventoryReport")
 
 
 class Session(Base):

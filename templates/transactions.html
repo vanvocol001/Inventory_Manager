@@ -4,13 +4,37 @@
     <div class="container ms-0 mt-2 mb-5">
         <h3>Transactions</h3>
         <hr>
-        <div class="row">
-            {% for transaction in transactions %}
-                <div class="card mt-1">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ transaction.transactionID }}</h5>
-                        <!-- <div class="card-text">{{ user.firstName }} {{ user.lastName }}</div>
-                        <div class="card-text infotext">{{ user.accountLevel }}</div> -->
+        <div class="row row-cols-1 row-cols-lg-3">
+            {% for transactionID, transaction in transactions.items() %}
+                <div class="col mt-3">
+                    <div class="card p-0 h-100">
+                        <div class="card-header">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="card-title col-2 text-muted fs-6">#{{ transactionID }}</div>
+                                    <div class="col">
+                                        <div class="float-end"><span class="text-muted">Date:</span> {{ transaction.date }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="container-fluid">
+                                {% for item in transaction.transactions %}
+                                    <div class="row">
+                                        <div class="col-3">{{ item.productID }}</div>
+                                        <div class="col-3 text-muted">x{{ item.quantitySold }}</div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row">
+                                <div class="col">
+                                    <button type="button" class="btn float-end" data-bs-deliveryid="{{ deliveryID }}" data-bs-toggle="modal" data-bs-target="#confirmDeliveryModal">&checkmark;</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             {% endfor %}

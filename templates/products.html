@@ -3,19 +3,19 @@
 {% block scripts %}
 {% endblock scripts %}
 {% block modal %}
-    <div class="modal fade" id="insertProductModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="insertProductModal" tabindex="-1" aria-labelledby="insertProductModal" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Add a New Product</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ url_for("add_product") }}" method="POST">
+                <form action="{{ url_for("add_product_endpoint") }}" method="POST">
                     <div class="modal-body">
                         <div class="container-fluid">
                             <div class="row">
                                 <input type="text" class="form-control col-12 mt-2" id="productdescription" name="product_description" placeholder="Product Name" required>
-                                <select class="form-select col-6 mt-2" id="supplier" name="supplier"  required>
+                                <select class="form-select col-6 mt-2" id="supplier" name="supplier_id" required>
                                     <option selected disabled value="">Choose Supplier...</option>
                                     {% for supplier in suppliers %}
                                         <option value="{{ supplier.supplierID }}">{{ supplier.name }}</option>
@@ -27,8 +27,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <button type="submit" class="btn btn-warning">Submit product</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Submit product</button>
                     </div>
                 </form>
             </div>

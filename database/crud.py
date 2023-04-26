@@ -68,4 +68,15 @@ def add_inventory_item(db: Session, product_description: str, supplier_id: int, 
                                        restockLimit=restock_limit, image=None)
     db.add(new_product)
     db.commit()
-    return
+
+
+def add_to_stock(db: Session, product_id: int, amount: int):
+    inventory_item = db.query(models.InventoryItem).filter(models.InventoryItem.productID == product_id).first()
+    inventory_item.stock = inventory_item.stock + amount
+    db.commit()
+
+
+def set_delivery_confirmed(db: Session, delivery_id):
+    delivery = db.query(models.Delivery).filter(models.Delivery.deliveryID == delivery_id).first()
+    delivery.delivered = True
+    db.commit()
