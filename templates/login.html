@@ -192,21 +192,15 @@
                   } 
       </style>
       <script>
-        $(document).ready(function() {
-            $('#password, #passwordconfirm').on('keyup',
-                function () {
-                    if ($('#password').val().length >= 8) {
-                        if ($('#password').val() == $('#passwordconfirm').val()) {
-                            $('#message').html('Your password matches').css('color', 'green');
-                        } else
-                            $('#message').html('Your password does not match').css('color', 'red');
-                    }
-                    else {
-                        $('#message').html('');
-                    }
-                });
-        });
-    </script>
+         function CheckMatching() {
+            var input = document.getElementById('passwordconfirm');
+            if (input.value != document.getElementById('password').value) {
+               input.setCustomValidity('Password Must be Matching.');
+            } else {
+               input.setCustomValidity('');
+            }
+         }
+      </script>
    </head>
    <body>
       <div class="wrapper">
@@ -227,13 +221,13 @@
                <div class="slider-tab"></div>
             </div>
             <div class="form-inner">
-               <form action="{{ url_for("user_login") }}" method="POST" class="login">
+               <form action="{{ url_for('user_login') }}" method="POST" class="login">
                   <div class="field">
-                     <input type="text" placeholder="User ID" id="userid" name="userid" required>
+                     <input type="text" placeholder="User ID" id="loginUserId" name="userid" required>
                   </div>
                   <div class="field">
                      <input type="password" placeholder="Password"
-                            id="password" name="password" required>
+                            id="loginPassword" name="password" required>
                   </div>
 
 
@@ -245,7 +239,7 @@
                      Not a member? <a href="">Register now</a>
                   </div>
                </form>
-               <form action="{{ url_for("user_register") }}" method="POST" class="signup">
+               <form action="{{ url_for('user_register') }}" method="POST" class="signup">
                   <div class="field">
                      <input type="text" placeholder="User ID" id="userid" name="userid" required>
                   </div>
