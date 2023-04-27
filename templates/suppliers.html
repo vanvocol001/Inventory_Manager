@@ -1,15 +1,52 @@
 {% extends "base.html" %}
 {% block title %}Suppliers - {{ user }}{% endblock %}
+{% block modal %}
+    <div class="modal fade" id="insertSupplierModal" tabindex="-1" aria-labelledby="insertSupplierModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add a New Supplier</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ url_for("add_supplier_endpoint") }}" method="POST">
+                    <div class="modal-body">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <input type="text" class="form-control col-12 mt-2" id="name" name="name" placeholder="Supplier Name" required>
+                                <input type="text" class="form-control col-12 mt-2" id="address" name="address" placeholder="Address" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-warning">Submit supplier</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock modal %}
 {% block content %}
     <div class="container-fluid ms-0 mt-2 mb-5">
-        <h3>Suppliers</h3>
+        <div class="row mb-2">
+            <h3 class="col">Products</h3>
+            <div class="col">
+                <button type="button" class="btn btn-warning float-end" data-bs-toggle="modal" data-bs-target="#insertSupplierModal">
+                    Add a new supplier
+                </button>
+            </div>
+        </div>
         <hr>
-        <div class="row">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
             {% for supplier in suppliers %}
-                <div class="card mt-1">
-                    <div class="card-body">
-                        <h5 class="card-title"><span class="text-muted fs-6">#{{ supplier.supplierID }}.</span> {{ supplier.name }}</h5>
-                        <div class="card-text infotext ms-5">{{ supplier.address }}</div>
+                <div class="col">
+                    <div class="card mt-1">
+                        <div class="card-header">
+                            <h5 class="card-title"><span class="text-muted fs-6">#{{ supplier.supplierID }}.</span> {{ supplier.name }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-text text-muted float-end">{{ supplier.address }}</div>
+                        </div>
                     </div>
                 </div>
             {% endfor %}

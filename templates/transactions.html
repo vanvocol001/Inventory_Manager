@@ -1,17 +1,101 @@
 {% extends "base.html" %}
 {% block title %}Transactions - {{ user }}{% endblock %}
+{% block scripts %}
+    <script>
+        $(document).ready(function() {
+            var numItems = 1
+            $('#additembtn').on('click', function (event) {
+                numItems += 1
+                newRow = '<div id="add' + numItems + '" class="row mt-2 add-item-row">'
+                    + '<div class="col-lg-6 ps-0">'
+                    + '<select class="form-select" id="product' + numItems + '" name="product" required>'
+                    + '<option selected disabled value="">Choose Product...</option>'
+                    {% for product in products %}
+                        + '<option value="{{ product.productID }}">{{ product.description }}</option>'
+                    {% endfor %}
+                    + '</select>'
+                    + '</div>'
+                    + '<div class="col-lg-6 p-0">'
+                    + '<input type="number" class="form-control" id="stock' + numItems + '" name="stock" placeholder="Amount Sold" pattern="\d*" min="0" required>'
+                    + '</div>'
+                    + '</div>'
+                $('#insertTransactionBody').append(newRow)
+            })
+
+            $('#minusitembtn').on('click', function (event) {
+                if (numItems > 1) {
+                    $('.add-item-row').last().remove()
+                    numItems -= 1
+                }
+            })
+        })
+    </script>
+{% endblock scripts %}
+{% block modal %}
+    <div class="modal fade" id="insertTransactionModal" tabindex="-1" aria-labelledby="insertTransactionModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add a New Transaction</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ url_for("add_transaction_endpoint") }}" method="POST">
+                    <div class="modal-body pt-0">
+                        <div id="insertTransactionBody" class="container-fluid">
+                            <div class="row">
+                                <div class="col pt-4"><hr class="mb-0"></div>
+                                <button id="additembtn" type="button" class="col-auto btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+  <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+</svg></button>
+                                <button id="minusitembtn" type="button" class="col-auto btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dash-circle" viewBox="0 0 16 16">
+  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+  <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/>
+</svg></button>
+                            </div>
+                            <div class="row mt-2 add-item-row">
+                                <div class="col-lg-6 ps-0">
+                                    <select class="form-select" id="product1" name="product" required>
+                                        <option selected disabled value="">Choose Product...</option>
+                                        {% for product in products %}
+                                            <option value="{{ product.productID }}">{{ product.description }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-lg-6 p-0">
+                                    <input type="number" class="form-control" id="stock1" name="stock" placeholder="Amount Sold" pattern="\d*" min="0" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-warning">Submit transaction</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock modal %}
 {% block content %}
-    <div class="container ms-0 mt-2 mb-5">
-        <h3>Transactions</h3>
+    <div class="container-fluid ms-0 mt-2 mb-5">
+        <div class="row mb-2">
+            <h3 class="col">Transactions</h3>
+            <div class="col">
+                <button type="button" class="btn btn-warning float-end" data-bs-toggle="modal" data-bs-target="#insertTransactionModal">
+                    Add a new transaction
+                </button>
+            </div>
+        </div>
         <hr>
         <div class="row row-cols-1 row-cols-lg-3">
-            {% for transactionID, transaction in transactions.items() %}
+            {% for transaction in transactions %}
                 <div class="col mt-3">
                     <div class="card p-0 h-100">
                         <div class="card-header">
                             <div class="container-fluid">
                                 <div class="row">
-                                    <div class="card-title col-2 text-muted fs-6">#{{ transactionID }}</div>
+                                    <div class="card-title col-auto text-muted fs-6">#{{ transaction.transactionID }}</div>
                                     <div class="col">
                                         <div class="float-end"><span class="text-muted">Date:</span> {{ transaction.date }}</div>
                                     </div>
@@ -22,17 +106,10 @@
                             <div class="container-fluid">
                                 {% for item in transaction.transactions %}
                                     <div class="row">
-                                        <div class="col-3">{{ item.productID }}</div>
-                                        <div class="col-3 text-muted">x{{ item.quantitySold }}</div>
+                                        <div class="col-3 col-sm-4 col-xl-3">{{ item.product.description }}</div>
+                                        <div class="col text-muted">x{{ item.quantitySold }}</div>
                                     </div>
                                 {% endfor %}
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <div class="row">
-                                <div class="col">
-                                    <button type="button" class="btn float-end" data-bs-deliveryid="{{ deliveryID }}" data-bs-toggle="modal" data-bs-target="#confirmDeliveryModal">&checkmark;</button>
-                                </div>
                             </div>
                         </div>
                     </div>

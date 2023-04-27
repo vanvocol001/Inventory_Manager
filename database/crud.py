@@ -1,4 +1,6 @@
+from typing import List
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 
 from . import models
 
@@ -70,13 +72,67 @@ def add_inventory_item(db: Session, product_description: str, supplier_id: int, 
     db.commit()
 
 
+def add_supplier(db: Session, name: str, address: str):
+    new_supplier = models.Supplier(name=name, address=address)
+    db.add(new_supplier)
+    db.commit()
+
+
 def add_to_stock(db: Session, product_id: int, amount: int):
     inventory_item = db.query(models.InventoryItem).filter(models.InventoryItem.productID == product_id).first()
     inventory_item.stock = inventory_item.stock + amount
     db.commit()
 
 
+def subtract_from_stock(db: Session, product_id: int, amount: int):
+    inventory_item = db.query(models.InventoryItem).filter(models.InventoryItem.productID == product_id).first()
+    inventory_item.stock = max(inventory_item.stock - amount, 0)
+    db.commit()
+
+
+def add_delivery(db: Session, date: str, supplier_id: int, products: List[int], stock: List[int]):
+    new_delivery = models.Delivery(dateExpected=date, supplierID=supplier_id)
+    db.add(new_delivery)
+    db.flush()
+    delivery_id = new_delivery.deliveryID
+
+    orders = []
+    for product_id, quantity in zip(products, stock):
+        order = models.InventoryOrder(deliveryID=delivery_id, productID=product_id, quantityOrdered=quantity)
+        orders.append(order)
+    db.bulk_save_objects(orders)
+    db.commit()
+
+
 def set_delivery_confirmed(db: Session, delivery_id):
     delivery = db.query(models.Delivery).filter(models.Delivery.deliveryID == delivery_id).first()
     delivery.delivered = True
+    db.commit()
+
+
+def add_transaction(db: Session, products: List[int], stock: List[int]):
+    new_transaction = models.Transaction()
+    db.add(new_transaction)
+    db.flush()
+    transaction_id = new_transaction.transactionID
+
+    items = []
+    for product_id, quantity in zip(products, stock):
+        item = models.TransactionReport(transactionID=transaction_id, productID=product_id, quantitySold=quantity)
+        items.append(item)
+    db.bulk_save_objects(items)
+    db.commit()
+
+
+def add_disposal(db: Session, user_id: str, reason: str, products: List[int], stock: List[int]):
+    new_disposal = models.DisposedInventory(reason=reason, userID=user_id)
+    db.add(new_disposal)
+    db.flush()
+    disposal_id = new_disposal.disposalID
+
+    items = []
+    for ind in range(0, len(products)):
+        item = models.DisposedInventoryReport(disposalID=disposal_id, productID=products[0], quantityDisposed=stock[0])
+        items.append(item)
+    db.bulk_save_objects(items)
     db.commit()

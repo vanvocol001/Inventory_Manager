@@ -138,15 +138,36 @@ def add_product_endpoint(product_description: str = Form(...), supplier_id: int 
 @app.post("/add_delivery")
 async def add_delivery_endpoint(date: str = Form(...), supplier_id: int = Form(...), product: List[int] = Form(...),
                                 stock: List[int] = Form(...), db: Session = Depends(get_db)):
-    print(date)
-    print(supplier_id)
-    print(product)
-    print(stock)
-
+    crud.add_delivery(db, date, supplier_id, product, stock)
     return RedirectResponse("/deliveries", status_code=302)
 
 
-@app.get("/confirm_delivery/")
+@app.post("/add_transaction")
+async def add_transaction_endpoint(product: List[int] = Form(...), stock: List[int] = Form(...),
+                                   db: Session = Depends(get_db)):
+    crud.add_transaction(db, product, stock)
+    for product_id, quantity in zip(product, stock):
+        crud.subtract_from_stock(db, product_id, quantity)
+    return RedirectResponse("/transactions", status_code=302)
+
+
+@app.post("/add_disposal")
+async def add_disposal_endpoint(request: Request, reason: str = Form(...), product: List[int] = Form(...),
+                                stock: List[int] = Form(...), db: Session = Depends(get_db)):
+    user = get_user_from_cookie(request, db)
+    crud.add_disposal(db, user, reason, product, stock)
+    for product_id, quantity in zip(product, stock):
+        crud.subtract_from_stock(db, product_id, quantity)
+    return RedirectResponse("/disposals", status_code=302)
+
+
+@app.post("/add_supplier")
+async def add_supplier_endpoint(name: str = Form(...), address: str = Form(...), db: Session = Depends(get_db)):
+    crud.add_supplier(db, name, address)
+    return RedirectResponse("/suppliers", status_code=302)
+
+
+@app.get("/confirm_delivery")
 async def confirm_delivery_endpoint(delivery_id: int, db: Session = Depends(get_db)):
     confirm_delivery(delivery_id, db)
     return RedirectResponse("/deliveries", status_code=302)
@@ -158,7 +179,9 @@ def get_homepage(request: Request, skip: int = 0, limit: int = 100, db: Session 
     if user is not None:
         inventory_items = crud.get_inventory_items(db, skip=skip, limit=limit)
         deliveries = crud.get_deliveries(db, skip=skip, limit=limit)
+        deliveries.reverse()
         disposals = crud.get_disposals(db, skip=skip, limit=limit)
+        disposals.reverse()
         is_admin = is_user_admin(user, db)
         return templates.TemplateResponse("overview.html", {"request": request, "products": inventory_items,
                                                             "deliveries": deliveries, "disposals": disposals,
@@ -183,8 +206,7 @@ def read_inventory_items(request: Request, skip: int = 0, limit: int = 100, db: 
         is_admin = is_user_admin(user, db)
         return templates.TemplateResponse("products.html", {"request": request, "products": inventory_items,
                                                             "suppliers": suppliers, "user": user, "is_admin": is_admin})
-    else:
-        return {"error": "You must be logged in."}
+    return RedirectResponse(url="/")
 
 
 @app.get("/deliveries/{deliveryID}", response_class=HTMLResponse)
@@ -206,8 +228,7 @@ def read_deliveries(request: Request, skip: int = 0, limit: int = 100, db: Sessi
         return templates.TemplateResponse("deliveries.html", {"request": request, "deliveries": deliveries,
                                                               "products": products, "suppliers": suppliers,
                                                               "user": user, "is_admin": is_admin})
-    else:
-        return {"error": "You must be logged in."}
+    return RedirectResponse(url="/")
 
 
 @app.get("/disposals/{disposalID}", response_class=HTMLResponse)
@@ -223,11 +244,11 @@ def read_disposals(request: Request, skip: int = 0, limit: int = 100, db: Sessio
     user = get_user_from_cookie(request, db)
     if user is not None:
         disposals = crud.get_disposals(db, skip=skip, limit=limit)
+        products = crud.get_inventory_items(db, skip=skip, limit=limit)
         is_admin = is_user_admin(user, db)
         return templates.TemplateResponse("disposals.html", {"request": request, "disposals": disposals,
-                                                             "user": user, "is_admin": is_admin})
-    else:
-        return {"error": "You must be logged in."}
+                                                             "products": products, "user": user, "is_admin": is_admin})
+    return RedirectResponse(url="/")
 
 
 @app.get("/transactions/{transactionID}", response_class=HTMLResponse)
@@ -243,11 +264,12 @@ def read_transactions(request: Request, skip: int = 0, limit: int = 100, db: Ses
     user = get_user_from_cookie(request, db)
     if user is not None:
         transactions = crud.get_transactions(db, skip=skip, limit=limit)
+        products = crud.get_inventory_items(db, skip=skip, limit=limit)
         is_admin = is_user_admin(user, db)
         return templates.TemplateResponse("transactions.html", {"request": request, "transactions": transactions,
-                                                                "user": user, "is_admin": is_admin})
-    else:
-        return {"error": "You must be logged in."}
+                                                                "products": products, "user": user,
+                                                                "is_admin": is_admin})
+    return RedirectResponse(url="/")
 
 
 @app.get("/suppliers/{supplierID}", response_class=HTMLResponse)
@@ -266,8 +288,7 @@ def read_suppliers(request: Request, skip: int = 0, limit: int = 100, db: Sessio
         is_admin = is_user_admin(user, db)
         return templates.TemplateResponse("suppliers.html", {"request": request, "suppliers": suppliers,
                                                              "user": user, "is_admin": is_admin})
-    else:
-        return {"error": "You must be logged in."}
+    return RedirectResponse(url="/")
 
 
 @app.get("/users/{userid}", response_model=schemas.User)

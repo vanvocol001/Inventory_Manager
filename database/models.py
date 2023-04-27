@@ -41,12 +41,14 @@ class TransactionReport(Base):
     productID = Column(Integer, ForeignKey("inventoryitem.productID"), primary_key=True)
     quantitySold = Column(Integer)
 
+    product = relationship("InventoryItem")
+
 
 class Transaction(Base):
     __tablename__ = "transaction"
 
     transactionID = Column(Integer, primary_key=True, index=True)
-    date = Column(Date, server_default=func.now())
+    date = Column(Date, default=func.current_date())
 
     transactions = relationship("TransactionReport")
 
@@ -65,10 +67,10 @@ class Delivery(Base):
     __tablename__ = "delivery"
 
     deliveryID = Column(Integer, primary_key=True, index=True)
-    dateOrdered = Column(Date, server_default=func.now())
+    dateOrdered = Column(Date, default=func.current_date())
     dateExpected = Column(Date)
     supplierID = Column(Integer, ForeignKey("supplier.supplierID"))
-    delivered = Column(Boolean)
+    delivered = Column(Boolean, default=False)
 
     items = relationship("InventoryOrder")
 
@@ -87,7 +89,7 @@ class DisposedInventory(Base):
     __tablename__ = "disposedinventory"
 
     disposalID = Column(Integer, primary_key=True, index=True)
-    dateDisposed = Column(Date, server_default=func.now())
+    dateDisposed = Column(Date, default=func.current_date())
     reason = Column(String)
     userID = Column(String, ForeignKey("user.userID"))
 
