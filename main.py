@@ -112,7 +112,10 @@ def user_logout(request: Request, response: Response, db: Session = Depends(get_
 
 @app.post("/register")
 def user_register(userid: str = Form(...), firstname: str = Form(...), lastname: str = Form(...),
-                  password: str = Form(...), db: Session = Depends(get_db)):
+                  password: str = Form(...), passwordconfirm: str = Form(...), db: Session = Depends(get_db)):
+    if password != passwordconfirm:
+        return RedirectResponse(url="/homepage", status_code=302)
+
     check_user = crud.get_user(db, userid=userid)
     if check_user is not None:
         raise HTTPException(status_code=303, detail=f"User {userid} already exists")
