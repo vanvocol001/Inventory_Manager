@@ -53,7 +53,7 @@
                                 <div class="container-fluid">
                                     {% for order in delivery.items %}
                                         <div class="row">
-                                            <div class="col-3">{{ order.product.description }}</div>
+                                            <div class="col-5">{{ order.product.description }}</div>
                                             <div class="col-3 text-muted">x{{ order.quantityOrdered }}</div>
                                         </div>
                                     {% endfor %}

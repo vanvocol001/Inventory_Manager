@@ -65,6 +65,11 @@ def get_user_session(db: Session, cookie_value: str):
     return db.query(models.Session).filter(models.Session.cookie == cookie_value).first()
 
 
+def delete_old_user_sessions(db: Session, user_id: str):
+    db.query(models.Session).filter(models.Session.userID == user_id).delete()
+    db.commit()
+
+
 def add_inventory_item(db: Session, product_description: str, supplier_id: int, stock: int, restock_limit: int):
     new_product = models.InventoryItem(description=product_description, supplierID=supplier_id, stock=stock,
                                        restockLimit=restock_limit, image=None)
@@ -135,4 +140,17 @@ def add_disposal(db: Session, user_id: str, reason: str, products: List[int], st
         item = models.DisposedInventoryReport(disposalID=disposal_id, productID=products[0], quantityDisposed=stock[0])
         items.append(item)
     db.bulk_save_objects(items)
+    db.commit()
+
+
+def update_account_level(db: Session, user_id: str, account_level: int):
+    user = get_user(db, user_id)
+    account_level = max(0, min(10, account_level))
+    user.accountLevel = account_level
+    db.commit()
+
+
+def delete_user(db: Session, user_id: str):
+    user = get_user(db, user_id)
+    db.delete(user)
     db.commit()

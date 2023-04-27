@@ -78,8 +78,10 @@ async def user_login(userid: str = Form(...), password: str = Form(...),
     else:
         hash_pw = hashlib.sha256(password.encode('utf-8')).hexdigest()
         if user.password == hash_pw:
+            crud.delete_old_user_sessions(db, user.userID)
+
             cookie_value = secrets.token_urlsafe(32)
-            new_session = models.Session(cookie=cookie_value, userID=userid)
+            new_session = models.Session(cookie=cookie_value, userID=user.userID)
             db.add(new_session)
             db.commit()
             db.refresh(new_session)
@@ -87,7 +89,7 @@ async def user_login(userid: str = Form(...), password: str = Form(...),
             redirect_response.set_cookie(key="_SESSION", value=cookie_value, expires=43200)
             return redirect_response
         else:
-            return "failure"
+            return RedirectResponse(url="/homepage", status_code=302)
 
 
 @app.get("/logout")
@@ -162,9 +164,29 @@ async def add_disposal_endpoint(request: Request, reason: str = Form(...), produ
 
 
 @app.post("/add_supplier")
-async def add_supplier_endpoint(name: str = Form(...), address: str = Form(...), db: Session = Depends(get_db)):
+def add_supplier_endpoint(name: str = Form(...), address: str = Form(...), db: Session = Depends(get_db)):
     crud.add_supplier(db, name, address)
     return RedirectResponse("/suppliers", status_code=302)
+
+
+@app.post("/user_changes")
+async def save_user_changes(request: Request, db: Session = Depends(get_db)):
+    form_data = await request.form()
+    for header in form_data:
+        account_level = form_data[header]
+        if account_level != '':
+            user_id = header[14:]
+            crud.update_account_level(db, user_id, int(account_level))
+    return RedirectResponse("/users", status_code=302)
+
+
+@app.get("/delete_user/{user_id}")
+def delete_user(request: Request, user_id: str, db: Session = Depends(get_db)):
+    current_user = get_user_from_cookie(request, db)
+    if is_user_admin(current_user, db) and not is_user_admin(user_id, db):
+        if current_user != user_id:
+            crud.delete_user(db, user_id)
+    return RedirectResponse("/users", status_code=302)
 
 
 @app.get("/confirm_delivery")
