@@ -111,7 +111,14 @@ def add_delivery(db: Session, date: str, supplier_id: int, products: List[int], 
 
 def set_delivery_confirmed(db: Session, delivery_id):
     delivery = db.query(models.Delivery).filter(models.Delivery.deliveryID == delivery_id).first()
-    delivery.delivered = True
+    delivery.status = "delivered"
+    db.commit()
+
+
+def set_delivery_rejected(db: Session, delivery_id: int, reason: str):
+    delivery = db.query(models.Delivery).filter(models.Delivery.deliveryID == delivery_id).first()
+    delivery.status = "rejected"
+    delivery.reason = reason
     db.commit()
 
 

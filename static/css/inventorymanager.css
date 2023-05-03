@@ -60,10 +60,6 @@ body {
     height: calc(100% - 56px);
 }
 
-.row {
-    height: 100%;
-}
-
 .infotext {
     font-size: small;
     color: gray;

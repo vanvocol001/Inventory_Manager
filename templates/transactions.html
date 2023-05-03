@@ -106,7 +106,7 @@
                             <div class="container-fluid">
                                 {% for item in transaction.transactions %}
                                     <div class="row">
-                                        <div class="col-3 col-sm-4 col-xl-3">{{ item.product.description }}</div>
+                                        <div class="col-5">{{ item.product.description }}</div>
                                         <div class="col text-muted">x{{ item.quantitySold }}</div>
                                     </div>
                                 {% endfor %}

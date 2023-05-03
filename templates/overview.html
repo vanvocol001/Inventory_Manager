@@ -11,16 +11,19 @@
                     <div class="card h-100 p-0">
                         <div class="card-header">
                             <div class="row">
-                                <div class="col text-muted fs-6">#{{ product.productID }}</div>
+                                <div class="col-auto text-muted fs-6">#{{ product.productID }}</div>
                                 <div class="col">
                                     <h5 class="float-end mb-0">{{ product.description }}</h5>
                                 </div>
                             </div>
                         </div>
-                        <div class="card-body row">
-                            <div class="col">
-                                <div class="card-text col float-end"><span style="{{ 'color: red' if product.stock < product.restockLimit
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-auto">{{ product.supplier.name }}</div>
+                                <div class="col float-end">
+                                    <div class="card-text col float-end"><span style="{{ 'color: red' if product.stock < product.restockLimit
                                     else 'color: green' }}">{{ product.stock }}</span> / {{ product.restockLimit }}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -37,7 +40,7 @@
                             <div class="card-header">
                                 <div class="container-fluid">
                                     <div class="row">
-                                        <div class="card-title col-2 text-muted fs-6">#{{ delivery.deliveryID }}</div>
+                                        <div class="card-title col-auto text-muted fs-6">#{{ delivery.deliveryID }}</div>
                                         <div class="col">
                                             <div class="float-end"><span class="text-muted">Date Ordered:</span> {{ delivery.dateOrdered }}</div>
                                         </div>
@@ -53,7 +56,7 @@
                                 <div class="container-fluid">
                                     {% for order in delivery.items %}
                                         <div class="row">
-                                            <div class="col-5">{{ order.product.description }}</div>
+                                            <div class="col-6">{{ order.product.description }}</div>
                                             <div class="col-3 text-muted">x{{ order.quantityOrdered }}</div>
                                         </div>
                                     {% endfor %}
@@ -73,7 +76,7 @@
                         <div class="card-header">
                             <div class="container-fluid">
                                 <div class="row">
-                                    <div class="card-title col-5 text-muted fs-6">#{{ disposal.disposalID }}</div>
+                                    <div class="card-title col-auto text-muted fs-6">#{{ disposal.disposalID }}</div>
                                     <div class="col">
                                         <div class="float-end"><span class="text-muted">Date Disposed:</span> {{ disposal.dateDisposed }}</div>
                                     </div>
@@ -84,7 +87,7 @@
                             <div class="container-fluid">
                             {% for item in disposal.items %}
                                 <div class="row">
-                                    <div class="col-md-6 col-lg-4">
+                                    <div class="col-6">
                                         {{ item.product.description }}
                                     </div>
                                     <div class="col">
@@ -96,7 +99,7 @@
                         </div>
                         <div class="card-footer">
                             <div class="container-fluid">
-                                <div class="row">
+                                <div class="row text-muted">
                                     {{ disposal.reason }}
                                 </div>
                                 <div class="row">

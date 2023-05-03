@@ -25,6 +25,8 @@ class InventoryItem(Base):
     restockLimit = Column(Integer)
     image = Column(String)
 
+    supplier = relationship("Supplier")
+
 
 class Supplier(Base):
     __tablename__ = "supplier"
@@ -70,7 +72,8 @@ class Delivery(Base):
     dateOrdered = Column(Date, default=func.current_date())
     dateExpected = Column(Date)
     supplierID = Column(Integer, ForeignKey("supplier.supplierID"))
-    delivered = Column(Boolean, default=False)
+    status = Column(String, default="pending")
+    reason = Column(String)
 
     items = relationship("InventoryOrder")
 

@@ -110,23 +110,27 @@ def user_logout(request: Request, response: Response, db: Session = Depends(get_
         return {"status": "cookie not found in database"}
 
 
+@app.get("/register/{result}")
+def user_register_redirect(request: Request, result: bool):
+    return templates.TemplateResponse("redirects/register.html", {"request": request, "result": result})
+
+
 @app.post("/register")
 def user_register(userid: str = Form(...), firstname: str = Form(...), lastname: str = Form(...),
                   password: str = Form(...), passwordconfirm: str = Form(...), db: Session = Depends(get_db)):
     if password != passwordconfirm:
-        return RedirectResponse(url="/homepage", status_code=302)
+        return RedirectResponse(url="/register/false", status_code=302)
 
     check_user = crud.get_user(db, userid=userid)
     if check_user is not None:
-        raise HTTPException(status_code=303, detail=f"User {userid} already exists")
+        return RedirectResponse(url="/register/false", status_code=302)
     hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
     new_user = models.User(userID=userid, firstName=firstname, lastName=lastname, accountLevel=0,
                            password=hashed_password)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    redirect_response = RedirectResponse(url="/homepage", status_code=302)
-    return redirect_response
+    return RedirectResponse(url="/register/true", status_code=302)
 
 
 @app.post("/add_product")
@@ -195,6 +199,12 @@ def delete_user(request: Request, user_id: str, db: Session = Depends(get_db)):
 @app.get("/confirm_delivery")
 async def confirm_delivery_endpoint(delivery_id: int, db: Session = Depends(get_db)):
     confirm_delivery(delivery_id, db)
+    return RedirectResponse("/deliveries", status_code=302)
+
+
+@app.post("/reject_delivery")
+async def reject_delivery_endpoint(delivery_id: int = Form(...), reason: str = Form(...), db: Session = Depends(get_db)):
+    crud.set_delivery_rejected(db, delivery_id, reason)
     return RedirectResponse("/deliveries", status_code=302)
 
 
