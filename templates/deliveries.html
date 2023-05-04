@@ -2,31 +2,50 @@
 {% block title %}Deliveries - {{ user }}{% endblock %}
 {% block scripts %}
     <script>
+        let productOptions = [
+            {% for product in products %}
+                {
+                    "product_id": {{ product.productID }},
+                    "description": "{{ product.description }}",
+                    "supplier_id": {{ product.supplier.supplierID }}
+                },
+            {% endfor %}
+        ];
+
         $(document).ready(function() {
+            $('#insertDeliveryModalForm')[0].reset();
+            $('.product-select').attr("disabled", true);
+
+            $('#supplier').on("change", function(event) {
+                $(".product-select").each(function(index) {
+                    $(this).empty();
+                    $(this).removeAttr("disabled");
+                    appendOptions($('#supplier').find(":selected").val(), $(this));
+                });
+            });
+
             $('.confirm-modal-btn').on('click', function (event) {
                 var deliveryid = $(this).attr('data-bs-deliveryid')
 
                 $('#confirmModalText').text('Confirm delivery of order #' + deliveryid + '?')
                 $('#confirmModalButton').attr('href', '/confirm_delivery?delivery_id=' + deliveryid)
-            })
+            });
 
             $('.reject-modal-btn').on('click', function (event) {
                 var deliveryid = $(this).attr('data-bs-deliveryid')
 
                 $('#rejectModalText').text('Reject delivery of order #' + deliveryid + '?')
                 $('#rejectDeliveryID').attr('value', deliveryid)
-            })
+            });
 
             var numItems = 1
             $('#additembtn').on('click', function (event) {
+                let supplier_selected = $('#supplier').find(":selected").val();
                 numItems += 1
                 newRow = '<div id="add' + numItems + '" class="row mt-2 add-item-row">'
                     + '<div class="col-lg-6 ps-0">'
-                    + '<select class="form-select" id="product' + numItems + '" name="product" required>'
-                    + '<option selected disabled value="">Choose Product...</option>'
-                    {% for product in products %}
-                        + '<option value="{{ product.productID }}">{{ product.description }}</option>'
-                    {% endfor %}
+                    + '<select class="form-select product-select" id="product' + numItems + '" name="product" disabled required>'
+                    + '<option selected value="">Choose a Supplier...</option>'
                     + '</select>'
                     + '</div>'
                     + '<div class="col-lg-6 p-0">'
@@ -34,15 +53,30 @@
                     + '</div>'
                     + '</div>'
                 $('#insertDeliveryBody').append(newRow)
-            })
+                if (supplier_selected != "") {
+                    let this_row = $('.product-select').last();
+                    this_row.removeAttr("disabled");
+                    this_row.empty();
+                    appendOptions(supplier_selected, this_row);
+                }
+            });
 
             $('#minusitembtn').on('click', function (event) {
                 if (numItems > 1) {
-                    $('.add-item-row').last().remove()
-                    numItems -= 1
+                    $('.add-item-row').last().remove();
+                    numItems -= 1;
                 }
-            })
-        })
+            });
+        });
+
+        function appendOptions(supplier_id, optionSelect) {
+            optionSelect.append("<option selected disabled value=''>Choose Product...</option>")
+            for (let i = 0; i < productOptions.length; i++) {
+                if (productOptions[i].supplier_id == supplier_id) {
+                    optionSelect.append("<option value='" + productOptions[i].product_id + "'>" + productOptions[i].description + "</option>");
+                }
+            }
+        }
     </script>
 {% endblock scripts %}
 {% block modal %}
@@ -91,7 +125,7 @@
                     <h5 class="modal-title">Add a New Delivery</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ url_for("add_delivery_endpoint") }}" method="POST">
+                <form id="insertDeliveryModalForm" action="{{ url_for("add_delivery_endpoint") }}" method="POST">
                     <div class="modal-body">
                         <div id="insertDeliveryBody" class="container-fluid">
                             <div class="row">
@@ -124,11 +158,8 @@
                             </div>
                             <div class="row mt-2 add-item-row">
                                 <div class="col-lg-6 ps-0">
-                                    <select class="form-select" id="product1" name="product" required>
-                                        <option selected disabled value="">Choose Product...</option>
-                                        {% for product in products %}
-                                            <option value="{{ product.productID }}">{{ product.description }}</option>
-                                        {% endfor %}
+                                    <select class="form-select product-select" id="product1" name="product" disabled required>
+                                        <option selected disabled value="">Choose a Supplier...</option>
                                     </select>
                                 </div>
                                 <div class="col-lg-6 p-0">
