@@ -36,6 +36,12 @@ def get_db():
         db.close()
 
 
+@app.on_event("startup")
+async def load_config():
+    with SessionLocal() as db:
+        config = permissions.load_config(db)
+
+
 def confirm_delivery(delivery_id: int, db: Session = Depends(get_db)) -> bool:
     delivery = crud.get_delivery(db, delivery_id)
     if delivery is not None:
@@ -49,7 +55,7 @@ def confirm_delivery(delivery_id: int, db: Session = Depends(get_db)) -> bool:
 def verify_permission(request: Request, perm_name: str, db: Session = Depends(get_db)) -> bool:
     user_id = get_user_from_cookie(request, db)
     user = crud.get_user(db, user_id)
-    return permissions.verify_permission(perm_name, user.accountLevel)
+    return crud.verify_permission(db, perm_name, user.accountLevel)
 
 
 def get_user_from_cookie(request: Request, db: Session = Depends(get_db)):

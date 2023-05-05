@@ -99,6 +99,18 @@ class DisposedInventory(Base):
     items = relationship("DisposedInventoryReport")
 
 
+class Permissions(Base):
+    __tablename__ = "permissions"
+
+    productCreate = Column(Integer, primary_key=True)
+    deliveryCreate = Column(Integer)
+    deliveryConfirm = Column(Integer)
+    deliveryReject = Column(Integer)
+    disposalCreate = Column(Integer)
+    transactionCreate = Column(Integer)
+    supplierCreate = Column(Integer)
+
+
 class Session(Base):
     __tablename__ = "session"
 

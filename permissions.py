@@ -1,56 +1,22 @@
-import configparser
-import os
+from database import crud
+from sqlalchemy.orm import Session
 
 
-def load_config():
-    if not os.path.isfile("database/config.ini"):
-        create_config()
-    config = configparser.ConfigParser()
-    config.read("database/config.ini")
+def load_config(db: Session):
+    permission_row = crud.load_permissions(db)
+    config = {
+        "ProductCreate": permission_row.productCreate,
+        "DeliveryCreate": permission_row.deliveryCreate,
+        "DeliveryConfirm": permission_row.deliveryConfirm,
+        "DeliveryReject": permission_row.deliveryReject,
+        "DisposalCreate": permission_row.disposalCreate,
+        "TransactionCreate": permission_row.transactionCreate,
+        "SupplierCreate": permission_row.supplierCreate
+    }
     return config
-
-
-def get_permissions():
-    return config["STORED"]
 
 
 def update_config(perm_dict):
     for perm, value in perm_dict.items():
         config["STORED"][perm] = value
     write_config(config)
-
-
-def write_config(config):
-    with open("database/config.ini", "w") as config_file:
-        config.write(config_file)
-
-
-def create_config():
-    default_config = configparser.ConfigParser()
-    default_config["DEFAULT"] = {
-            "ProductCreate": 5,
-            "DeliveryCreate": 5,
-            "DeliveryConfirm": 0,
-            "DeliveryReject": 5,
-            "DisposalCreate": 5,
-            "TransactionCreate": 0,
-            "SupplierCreate": 10
-        }
-    default_config["STORED"] = {
-            "ProductCreate": 5,
-            "DeliveryCreate": 5,
-            "DeliveryConfirm": 0,
-            "DeliveryReject": 5,
-            "DisposalCreate": 5,
-            "TransactionCreate": 0,
-            "SupplierCreate": 10
-        }
-
-    write_config(default_config)
-
-
-def verify_permission(perm_name: str, account_level: int):
-    return account_level >= int(config["STORED"][perm_name])
-
-
-config = load_config()

@@ -161,3 +161,28 @@ def delete_user(db: Session, user_id: str):
     user = get_user(db, user_id)
     db.delete(user)
     db.commit()
+
+
+def load_permissions(db: Session):
+    return db.query(models.Permissions).first()
+
+
+def verify_permission(db: Session, perm_name: str, account_level: int):
+    permission = db.query(models.Permissions).first()
+    if perm_name == "ProductCreate":
+        return account_level >= permission.productCreate
+    elif perm_name == "DeliveryCreate":
+        return account_level >= permission.deliveryCreate
+    elif perm_name == "DeliveryConfirm":
+        return account_level >= permission.deliveryConfirm
+    elif perm_name == "DeliveryReject":
+        return account_level >= permission.deliveryReject
+    elif perm_name == "DisposalCreate":
+        return account_level >= permission.disposalCreate
+    elif perm_name == "TransactionCreate":
+        return account_level >= permission.transactionCreate
+    elif perm_name == "SupplierCreate":
+        return account_level >= permission.supplierCreate
+    else:
+        return False
+
