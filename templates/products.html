@@ -3,6 +3,7 @@
 {% block scripts %}
 {% endblock scripts %}
 {% block modal %}
+    {% if perms["ProductCreate"] %}
     <div class="modal fade" id="insertProductModal" tabindex="-1" aria-labelledby="insertProductModal" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -34,16 +35,19 @@
             </div>
         </div>
     </div>
+    {% endif %}
 {% endblock modal %}
 {% block content %}
     <div class="container-fluid ms-0 mt-2">
         <div class="row">
             <h3 class="col">Products</h3>
+            {% if perms["ProductCreate"] %}
             <div class="col">
                 <button type="button" class="btn btn-warning float-end" data-bs-toggle="modal" data-bs-target="#insertProductModal">
                     Add a new product
                 </button>
             </div>
+            {% endif %}
         </div>
         <hr>
         <div class="row">

@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="container-fluid ms-0 mt-2 mb-5">
+        <form action="{{ url_for("save_permission_changes") }}" method="POST">
+            <div class="row">
+                <h3 class="col-auto">User Permissions</h3>
+                <div class="col">
+                    <button type="submit" class="btn btn-warning float-end">Save changes</button>
+                </div>
+            </div>
+            <hr class="mt-2">
+            <div class="row">
+                <div class="col-6 mt-3">
+                    <div class="card p-0">
+                        <div class="card-body">
+                            <div class="row">
+                                <label for="" class="form-label col my-auto">Adding new products</label>
+                                <div class="col-4">
+                                    <input type="number" id="createProductInput" name="ProductCreate" placeholder="0-10" min="0" max="10" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row">
+                                <div class="col">
+                                    <span class="float-end">Current account level required: {{ perms["ProductCreate"] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 mt-3">
+                    <div class="card p-0">
+                        <div class="card-body">
+                            <div class="row">
+                                <label for="" class="form-label col my-auto">Creating new deliveries</label>
+                                <div class="col-4">
+                                    <input type="number" id="createProductInput" name="DeliveryCreate" placeholder="0-10" min="0" max="10" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row">
+                                <div class="col">
+                                    <span class="float-end">Current account level required: {{ perms["DeliveryCreate"] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 mt-3">
+                    <div class="card p-0">
+                        <div class="card-body">
+                            <div class="row">
+                                <label for="" class="form-label col my-auto">Confirming deliveries</label>
+                                <div class="col-4">
+                                    <input type="number" id="createProductInput" name="DeliveryConfirm" placeholder="0-10" min="0" max="10" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row">
+                                <div class="col">
+                                    <span class="float-end">Current account level required: {{ perms["DeliveryConfirm"] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 mt-3">
+                    <div class="card p-0">
+                        <div class="card-body">
+                            <div class="row">
+                                <label for="" class="form-label col my-auto">Rejecting deliveries</label>
+                                <div class="col-4">
+                                    <input type="number" id="createProductInput" name="DeliveryReject" placeholder="0-10" min="0" max="10" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row">
+                                <div class="col">
+                                    <span class="float-end">Current account level required: {{ perms["DeliveryReject"] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 mt-3">
+                    <div class="card p-0">
+                        <div class="card-body">
+                            <div class="row">
+                                <label for="" class="form-label col my-auto">Creating new disposals</label>
+                                <div class="col-4">
+                                    <input type="number" id="createProductInput" name="DisposalCreate" placeholder="0-10" min="0" max="10" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row">
+                                <div class="col">
+                                    <span class="float-end">Current account level required: {{ perms["DisposalCreate"] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 mt-3">
+                    <div class="card p-0">
+                        <div class="card-body">
+                            <div class="row">
+                                <label for="" class="form-label col my-auto">Creating new transactions</label>
+                                <div class="col-4">
+                                    <input type="number" id="createProductInput" name="TransactionCreate" placeholder="0-10" min="0" max="10" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row">
+                                <div class="col">
+                                    <span class="float-end">Current account level required: {{ perms["TransactionCreate"] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 mt-3">
+                    <div class="card p-0">
+                        <div class="card-body">
+                            <div class="row">
+                                <label for="" class="form-label col my-auto">Creating new suppliers</label>
+                                <div class="col-4">
+                                    <input type="number" id="createProductInput" name="SupplierCreate" placeholder="0-10" min="0" max="10" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row">
+                                <div class="col">
+                                    <span class="float-end">Current account level required: {{ perms["SupplierCreate"] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock content %}

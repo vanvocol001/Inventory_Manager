@@ -17,6 +17,8 @@
             <li class="text-white">Administrator Pages</li>
             <li class="nav-item"><a class="nav-link {% if request.url.path == "/users/" %}active{% endif %}"
                                 href="{{ url_for("read_users") }}">Users</a></li>
+            <li class="nav-item"><a class="nav-link {% if request.url.path == "/permissions/" %}active{% endif %}"
+                                href="{{ url_for("read_permissions") }}">Permissions</a></li>
         {% endif %}
     </ul>
 </div>

@@ -3,6 +3,7 @@ from typing import List
 import hashlib
 import uvicorn
 import secrets
+import permissions
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Form, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -45,6 +46,12 @@ def confirm_delivery(delivery_id: int, db: Session = Depends(get_db)) -> bool:
     return False
 
 
+def verify_permission(request: Request, perm_name: str, db: Session = Depends(get_db)) -> bool:
+    user_id = get_user_from_cookie(request, db)
+    user = crud.get_user(db, user_id)
+    return permissions.verify_permission(perm_name, user.accountLevel)
+
+
 def get_user_from_cookie(request: Request, db: Session = Depends(get_db)):
     cookie = request.cookies.get("_SESSION")
     if cookie is not None:
@@ -59,6 +66,11 @@ def is_user_admin(userid: str, db: Session = Depends(get_db)):
     if user is not None:
         return user.accountLevel >= 10
     return False
+
+
+@app.get("/error/", response_class=HTMLResponse)
+def get_errorpage(request: Request):
+    return templates.TemplateResponse("redirects/error.html", {"request": request})
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -93,7 +105,7 @@ async def user_login(userid: str = Form(...), password: str = Form(...),
 
 
 @app.get("/logout")
-def user_logout(request: Request, response: Response, db: Session = Depends(get_db)):
+def user_logout(request: Request, db: Session = Depends(get_db)):
     cookie = request.cookies.get("_SESSION")
     redirect_response = RedirectResponse(url="/", status_code=302)
     if cookie is not None:
@@ -134,8 +146,11 @@ def user_register(userid: str = Form(...), firstname: str = Form(...), lastname:
 
 
 @app.post("/add_product")
-def add_product_endpoint(product_description: str = Form(...), supplier_id: int = Form(...), stock: int = Form(...),
-                         restock_limit: int = Form(...), db: Session = Depends(get_db)):
+def add_product_endpoint(request: Request, product_description: str = Form(...), supplier_id: int = Form(...),
+                         stock: int = Form(...), restock_limit: int = Form(...), db: Session = Depends(get_db)):
+    if not verify_permission(request, "ProductCreate", db):
+        return RedirectResponse(url="/error/", status_code=302)
+
     verify_supplier = crud.get_supplier(db, supplier_id)
     if verify_supplier is not None:
         crud.add_inventory_item(db, product_description, supplier_id, stock, restock_limit)
@@ -145,15 +160,22 @@ def add_product_endpoint(product_description: str = Form(...), supplier_id: int 
 
 
 @app.post("/add_delivery")
-async def add_delivery_endpoint(date: str = Form(...), supplier_id: int = Form(...), product: List[int] = Form(...),
-                                stock: List[int] = Form(...), db: Session = Depends(get_db)):
+async def add_delivery_endpoint(request: Request, date: str = Form(...), supplier_id: int = Form(...),
+                                product: List[int] = Form(...), stock: List[int] = Form(...),
+                                db: Session = Depends(get_db)):
+    if not verify_permission(request, "DeliveryCreate", db):
+        return RedirectResponse(url="/error/", status_code=302)
+
     crud.add_delivery(db, date, supplier_id, product, stock)
     return RedirectResponse("/deliveries", status_code=302)
 
 
 @app.post("/add_transaction")
-async def add_transaction_endpoint(product: List[int] = Form(...), stock: List[int] = Form(...),
+async def add_transaction_endpoint(request: Request, product: List[int] = Form(...), stock: List[int] = Form(...),
                                    db: Session = Depends(get_db)):
+    if not verify_permission(request, "TransactionCreate", db):
+        return RedirectResponse(url="/error/", status_code=302)
+
     crud.add_transaction(db, product, stock)
     for product_id, quantity in zip(product, stock):
         crud.subtract_from_stock(db, product_id, quantity)
@@ -163,6 +185,9 @@ async def add_transaction_endpoint(product: List[int] = Form(...), stock: List[i
 @app.post("/add_disposal")
 async def add_disposal_endpoint(request: Request, reason: str = Form(...), product: List[int] = Form(...),
                                 stock: List[int] = Form(...), db: Session = Depends(get_db)):
+    if not verify_permission(request, "DisposalCreate", db):
+        return RedirectResponse(url="/error/", status_code=302)
+
     user = get_user_from_cookie(request, db)
     crud.add_disposal(db, user, reason, product, stock)
     for product_id, quantity in zip(product, stock):
@@ -171,7 +196,11 @@ async def add_disposal_endpoint(request: Request, reason: str = Form(...), produ
 
 
 @app.post("/add_supplier")
-def add_supplier_endpoint(name: str = Form(...), address: str = Form(...), db: Session = Depends(get_db)):
+def add_supplier_endpoint(request: Request, name: str = Form(...), address: str = Form(...),
+                          db: Session = Depends(get_db)):
+    if not verify_permission(request, "SupplierCreate", db):
+        return RedirectResponse(url="/error/", status_code=302)
+
     crud.add_supplier(db, name, address)
     return RedirectResponse("/suppliers", status_code=302)
 
@@ -196,14 +225,33 @@ def delete_user(request: Request, user_id: str, db: Session = Depends(get_db)):
     return RedirectResponse("/users", status_code=302)
 
 
+@app.post("/permission_changes")
+async def save_permission_changes(request: Request, db: Session = Depends(get_db)):
+    form_data = await request.form()
+
+    new_perms = {}
+    for header in form_data:
+        if form_data[header] != "":
+            new_perms[header] = form_data[header]
+    permissions.update_config(new_perms)
+    return RedirectResponse("/permissions", status_code=302)
+
+
 @app.get("/confirm_delivery")
-async def confirm_delivery_endpoint(delivery_id: int, db: Session = Depends(get_db)):
+async def confirm_delivery_endpoint(request: Request, delivery_id: int, db: Session = Depends(get_db)):
+    if not verify_permission(request, "DeliveryConfirm", db):
+        return RedirectResponse(url="/error/", status_code=302)
+
     confirm_delivery(delivery_id, db)
     return RedirectResponse("/deliveries", status_code=302)
 
 
 @app.post("/reject_delivery")
-async def reject_delivery_endpoint(delivery_id: int = Form(...), reason: str = Form(...), db: Session = Depends(get_db)):
+async def reject_delivery_endpoint(request: Request, delivery_id: int = Form(...), reason: str = Form(...),
+                                   db: Session = Depends(get_db)):
+    if not verify_permission(request, "DeliveryReject", db):
+        return RedirectResponse(url="/error/", status_code=302)
+
     crud.set_delivery_rejected(db, delivery_id, reason)
     return RedirectResponse("/deliveries", status_code=302)
 
@@ -221,15 +269,7 @@ def get_homepage(request: Request, skip: int = 0, limit: int = 100, db: Session 
         return templates.TemplateResponse("overview.html", {"request": request, "products": inventory_items,
                                                             "deliveries": deliveries, "disposals": disposals,
                                                             "user": user, "is_admin": is_admin})
-    return RedirectResponse(url="/")
-
-
-@app.get("/products/{productid}", response_class=HTMLResponse)
-def read_inventory_item(request: Request, productid: int, db: Session = Depends(get_db)):
-    product = crud.get_inventory_item(db, productid=productid)
-    if product is None:
-        raise HTTPException(status_code=404, detail="Product not found")
-    return templates.TemplateResponse("products.html", {"request": request, "products": [product]})
+    return RedirectResponse("/error")
 
 
 @app.get("/products/", response_class=HTMLResponse)
@@ -239,17 +279,13 @@ def read_inventory_items(request: Request, skip: int = 0, limit: int = 100, db: 
         inventory_items = crud.get_inventory_items(db, skip=skip, limit=limit)
         suppliers = crud.get_suppliers(db, skip=skip, limit=limit)
         is_admin = is_user_admin(user, db)
+        perms = {
+            "ProductCreate": verify_permission(request, "ProductCreate", db)
+        }
         return templates.TemplateResponse("products.html", {"request": request, "products": inventory_items,
-                                                            "suppliers": suppliers, "user": user, "is_admin": is_admin})
-    return RedirectResponse(url="/")
-
-
-@app.get("/deliveries/{deliveryID}", response_class=HTMLResponse)
-def read_delivery(request: Request, deliveryid: int, db: Session = Depends(get_db)):
-    delivery = crud.get_delivery(db, deliveryid=deliveryid)
-    if delivery is None:
-        raise HTTPException(status_code=404, detail="Delivery not found")
-    return templates.TemplateResponse("deliveries.html", {"request": request, "deliveries": [delivery]})
+                                                            "suppliers": suppliers, "user": user, "is_admin": is_admin,
+                                                            "perms": perms})
+    return RedirectResponse("/error")
 
 
 @app.get("/deliveries/", response_class=HTMLResponse)
@@ -260,18 +296,15 @@ def read_deliveries(request: Request, skip: int = 0, limit: int = 100, db: Sessi
         products = crud.get_inventory_items(db, skip=skip, limit=limit)
         suppliers = crud.get_suppliers(db, skip=skip, limit=limit)
         is_admin = is_user_admin(user, db)
+        perms = {
+            "DeliveryCreate": verify_permission(request, "DeliveryCreate", db),
+            "DeliveryConfirm": verify_permission(request, "DeliveryConfirm", db),
+            "DeliveryReject": verify_permission(request, "DeliveryReject", db)
+        }
         return templates.TemplateResponse("deliveries.html", {"request": request, "deliveries": deliveries,
                                                               "products": products, "suppliers": suppliers,
-                                                              "user": user, "is_admin": is_admin})
-    return RedirectResponse(url="/")
-
-
-@app.get("/disposals/{disposalID}", response_class=HTMLResponse)
-def read_disposal(request: Request, disposalid: int, db: Session = Depends(get_db)):
-    disposal = crud.get_disposal(db, disposalid=disposalid)
-    if disposal is None:
-        raise HTTPException(status_code=404, detail="Disposal not found")
-    return templates.TemplateResponse("disposals.html", {"request": request, "disposal": [disposal]})
+                                                              "user": user, "is_admin": is_admin, "perms": perms})
+    return RedirectResponse("/error")
 
 
 @app.get("/disposals/", response_class=HTMLResponse)
@@ -281,17 +314,13 @@ def read_disposals(request: Request, skip: int = 0, limit: int = 100, db: Sessio
         disposals = crud.get_disposals(db, skip=skip, limit=limit)
         products = crud.get_inventory_items(db, skip=skip, limit=limit)
         is_admin = is_user_admin(user, db)
+        perms = {
+            "DisposalCreate": verify_permission(request, "DisposalCreate", db)
+        }
         return templates.TemplateResponse("disposals.html", {"request": request, "disposals": disposals,
-                                                             "products": products, "user": user, "is_admin": is_admin})
-    return RedirectResponse(url="/")
-
-
-@app.get("/transactions/{transactionID}", response_class=HTMLResponse)
-def read_transaction(request: Request, transactionid: int, db: Session = Depends(get_db)):
-    transaction = crud.get_transaction(db, transactionid=transactionid)
-    if transaction is None:
-        raise HTTPException(status_code=404, detail="Transaction not found")
-    return templates.TemplateResponse("transactions.html", {"request": request, "transaction": [transaction]})
+                                                             "products": products, "user": user, "is_admin": is_admin,
+                                                             "perms": perms})
+    return RedirectResponse("/error")
 
 
 @app.get("/transactions/", response_class=HTMLResponse)
@@ -301,18 +330,13 @@ def read_transactions(request: Request, skip: int = 0, limit: int = 100, db: Ses
         transactions = crud.get_transactions(db, skip=skip, limit=limit)
         products = crud.get_inventory_items(db, skip=skip, limit=limit)
         is_admin = is_user_admin(user, db)
+        perms = {
+            "TransactionCreate": verify_permission(request, "TransactionCreate", db)
+        }
         return templates.TemplateResponse("transactions.html", {"request": request, "transactions": transactions,
                                                                 "products": products, "user": user,
-                                                                "is_admin": is_admin})
-    return RedirectResponse(url="/")
-
-
-@app.get("/suppliers/{supplierID}", response_class=HTMLResponse)
-def read_supplier(request: Request, supplierid: int, db: Session = Depends(get_db)):
-    supplier = crud.get_supplier(db, supplierid=supplierid)
-    if supplier is None:
-        raise HTTPException(status_code=404, detail="Supplier not found")
-    return templates.TemplateResponse("suppliers.html", {"request": request, "supplier": [supplier]})
+                                                                "is_admin": is_admin, "perms": perms})
+    return RedirectResponse("/error")
 
 
 @app.get("/suppliers/", response_class=HTMLResponse)
@@ -321,17 +345,12 @@ def read_suppliers(request: Request, skip: int = 0, limit: int = 100, db: Sessio
     if user is not None:
         suppliers = crud.get_suppliers(db, skip=skip, limit=limit)
         is_admin = is_user_admin(user, db)
+        perms = {
+            "SupplierCreate": verify_permission(request, "SupplierCreate", db)
+        }
         return templates.TemplateResponse("suppliers.html", {"request": request, "suppliers": suppliers,
-                                                             "user": user, "is_admin": is_admin})
-    return RedirectResponse(url="/")
-
-
-@app.get("/users/{userid}", response_model=schemas.User)
-def read_user(userid: str, db: Session = Depends(get_db)):
-    user = crud.get_user(db, userid=userid)
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+                                                             "user": user, "is_admin": is_admin, "perms": perms})
+    return RedirectResponse("/error")
 
 
 @app.get("/users/", response_class=HTMLResponse)
@@ -343,7 +362,19 @@ def read_users(request: Request, skip: int = 0, limit: int = 100, db: Session = 
             users = crud.get_users(db, skip=skip, limit=limit)
             return templates.TemplateResponse("users.html", {"request": request, "users": users,
                                                              "user": user, "is_admin": is_admin})
-    return RedirectResponse("/")
+    return RedirectResponse("/error")
+
+
+@app.get("/permissions/", response_class=HTMLResponse)
+def read_permissions(request: Request, db: Session = Depends(get_db)):
+    user = get_user_from_cookie(request, db)
+    if user is not None:
+        is_admin = is_user_admin(user, db)
+        if is_admin:
+            perms = permissions.get_permissions()
+            return templates.TemplateResponse("permissions.html", {"request": request, "user": user,
+                                                                   "is_admin": is_admin, "perms": perms})
+    return RedirectResponse("/error")
 
 
 if __name__ == "__main__":
