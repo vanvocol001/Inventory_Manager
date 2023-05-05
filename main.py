@@ -239,7 +239,7 @@ async def save_permission_changes(request: Request, db: Session = Depends(get_db
     for header in form_data:
         if form_data[header] != "":
             new_perms[header] = form_data[header]
-    permissions.update_config(new_perms)
+    crud.update_permissions(db, new_perms)
     return RedirectResponse("/permissions", status_code=302)
 
 
@@ -377,7 +377,7 @@ def read_permissions(request: Request, db: Session = Depends(get_db)):
     if user is not None:
         is_admin = is_user_admin(user, db)
         if is_admin:
-            perms = permissions.get_permissions()
+            perms = crud.get_permissions(db)
             return templates.TemplateResponse("permissions.html", {"request": request, "user": user,
                                                                    "is_admin": is_admin, "perms": perms})
     return RedirectResponse("/error")

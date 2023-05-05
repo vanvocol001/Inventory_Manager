@@ -186,3 +186,28 @@ def verify_permission(db: Session, perm_name: str, account_level: int):
     else:
         return False
 
+
+def get_permissions(db: Session):
+    perms = db.query(models.Permissions).first()
+    return perms.__dict__
+
+
+def update_permissions(db: Session, new_permissions: dict):
+    old_perms = db.query(models.Permissions).first()
+    for perm, value in new_permissions.items():
+        if perm == "ProductCreate":
+            old_perms.productCreate = value
+        elif perm == "DeliveryCreate":
+            old_perms.deliveryCreate = value
+        elif perm == "DeliveryConfirm":
+            old_perms.deliveryConfirm = value
+        elif perm == "DeliveryReject":
+            old_perms.deliveryReject = value
+        elif perm == "DisposalCreate":
+            old_perms.disposalCreate = value
+        elif perm == "TransactionCreate":
+            old_perms.transactionCreate = value
+        elif perm == "SupplierCreate":
+            old_perms.supplierCreate = value
+    db.commit()
+
